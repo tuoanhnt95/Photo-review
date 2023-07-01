@@ -49,3 +49,6 @@ end
 # Use dotenv to load environment variables from .env into ENV in development
 # hide secret keys from Github
 gem "dotenv-rails"
+
+# Use cloudinary to upload images
+gem "cloudinary"
