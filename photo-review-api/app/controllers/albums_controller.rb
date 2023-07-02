@@ -1,6 +1,11 @@
 class AlbumsController < ApplicationController
   def index
     @albums = Album.all
+    if @albums
+      render json: @albums.to_json, status: :ok
+    else
+      render json: { error: 'No albums found' }, status: :not_found
+    end
   end
 
   def new
@@ -8,8 +13,12 @@ class AlbumsController < ApplicationController
   end
 
   def create
-    @album = Album.new(params[:album])
-    @album.save
+    @album = Album.new(album_params)
+    if @album.save
+      redirect_to albums_path, notice: 'Album was successfully created.'
+    else
+      render :new, status: :unprocessable_entity
+    end
   end
 
   def show
@@ -26,7 +35,7 @@ class AlbumsController < ApplicationController
 
   private
 
-  def albums_params
-    params.require(:album).permit(:name, :expiry_date)
+  def album_params
+    params.permit(:name, :expiry_date)
   end
 end
