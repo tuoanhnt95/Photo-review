@@ -52,3 +52,6 @@ gem "dotenv-rails"
 
 # Use cloudinary to upload images
 gem "cloudinary"
+
+# Use devise to authenticate users
+gem "devise"
