@@ -1,38 +1,38 @@
 require "test_helper"
 
 class AlbumsControllerTest < ActionDispatch::IntegrationTest
+  setup do
+    @album = albums(:one)
+  end
+
   test "should get index" do
-    get albums_index_url
+    get albums_url, as: :json
     assert_response :success
   end
 
-  test "should get new" do
-    get albums_new_url
+  test "should create album" do
+    assert_difference("Album.count") do
+      post albums_url, params: { album: { expiry_date: @album.expiry_date, name: @album.name } }, as: :json
+    end
+
+    assert_response :created
+  end
+
+  test "should show album" do
+    get album_url(@album), as: :json
     assert_response :success
   end
 
-  test "should get create" do
-    get albums_create_url
+  test "should update album" do
+    patch album_url(@album), params: { album: { expiry_date: @album.expiry_date, name: @album.name } }, as: :json
     assert_response :success
   end
 
-  test "should get show" do
-    get albums_show_url
-    assert_response :success
-  end
+  test "should destroy album" do
+    assert_difference("Album.count", -1) do
+      delete album_url(@album), as: :json
+    end
 
-  test "should get edit" do
-    get albums_edit_url
-    assert_response :success
-  end
-
-  test "should get update" do
-    get albums_update_url
-    assert_response :success
-  end
-
-  test "should get destroy" do
-    get albums_destroy_url
-    assert_response :success
+    assert_response :no_content
   end
 end
