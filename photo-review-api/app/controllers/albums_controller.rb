@@ -1,5 +1,7 @@
 class AlbumsController < ApplicationController
   before_action :set_album, only: %i[ show update destroy ]
+  skip_before_action :verify_authenticity_token
+  skip_before_action :authenticate_user!
 
   # GET /albums
   def index
@@ -16,7 +18,8 @@ class AlbumsController < ApplicationController
   # POST /albums
   def create
     @album = Album.new(album_params)
-    @album.user = current_user
+    # @album.user = current_user
+    @album.user = User.first
 
     if @album.save
       render json: @album, status: :created, location: @album
