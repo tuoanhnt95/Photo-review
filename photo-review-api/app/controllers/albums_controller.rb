@@ -16,6 +16,7 @@ class AlbumsController < ApplicationController
   # POST /albums
   def create
     @album = Album.new(album_params)
+    @album.user = current_user
 
     if @album.save
       render json: @album, status: :created, location: @album
@@ -46,6 +47,6 @@ class AlbumsController < ApplicationController
 
     # Only allow a list of trusted parameters through.
     def album_params
-      params.require(:album).permit(:name, :expiry_date)
+      params.require(:album).permit(:name, :expiry_date, :user_id)
     end
 end
