@@ -10,24 +10,28 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.0].define(version: 2023_07_04_143649) do
+ActiveRecord::Schema[7.0].define(version: 2023_07_04_151443) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
 
   create_table "albums", force: :cascade do |t|
     t.string "name"
     t.date "expiry_date"
+    t.bigint "user_id", null: false
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.index ["user_id"], name: "index_albums_on_user_id"
   end
 
   create_table "photo_user_reviews", force: :cascade do |t|
     t.bigint "photo_id", null: false
+    t.bigint "user_id", null: false
     t.bigint "review_id", null: false
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.index ["photo_id"], name: "index_photo_user_reviews_on_photo_id"
     t.index ["review_id"], name: "index_photo_user_reviews_on_review_id"
+    t.index ["user_id"], name: "index_photo_user_reviews_on_user_id"
   end
 
   create_table "photos", force: :cascade do |t|
@@ -57,7 +61,9 @@ ActiveRecord::Schema[7.0].define(version: 2023_07_04_143649) do
     t.index ["reset_password_token"], name: "index_users_on_reset_password_token", unique: true
   end
 
+  add_foreign_key "albums", "users"
   add_foreign_key "photo_user_reviews", "photos"
   add_foreign_key "photo_user_reviews", "reviews"
+  add_foreign_key "photo_user_reviews", "users"
   add_foreign_key "photos", "albums"
 end

@@ -2,8 +2,8 @@
 
 one:
   name: MyString
-  expiry_date: 2023-07-01
+  expiry_date: 2023-07-04
 
 two:
   name: MyString
-  expiry_date: 2023-07-01
+  expiry_date: 2023-07-04
