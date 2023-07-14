@@ -1,8 +1,3 @@
-<script setup lang="ts">
-import { RouterLink, RouterView } from 'vue-router'
-import Albums from './components/Albums.vue'
-</script>
-
 <template>
   <header>
     <!-- <img alt="Vue logo" class="logo" src="@/assets/logo.svg" width="125" height="125" /> -->
@@ -19,6 +14,13 @@ import Albums from './components/Albums.vue'
 
   <RouterView />
 </template>
+
+<script setup lang="ts">
+import { RouterLink, RouterView } from 'vue-router'
+
+import Albums from './views/Albums.vue'
+
+</script>
 
 <style scoped>
 header {
