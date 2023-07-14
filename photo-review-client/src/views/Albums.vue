@@ -1,26 +1,34 @@
 <template>
-  <div>
-    <div v-for="(album, i) in albums" :key="i" class="border m-2 p-2">
-      <div v-if="!isEditing(album.id)"
-        @dblclick.stop.prevent="editItem(album)"
-      >
-        <div>
-          {{ album.name }}
-        </div>
-        <div>
-          {{ album.expiry_date }}
+  <div class="bg-white dark:bg-slate-800 text-slate-900 dark:text-white">
+    <div class="text-xl font-bold text-violet-600">Albums</div>
+    <div class="grid grid-cols-2 gap-4 md:grid-cols-4 lg:grid-cols-6 mb-6">
+      <div class="w-36 h-44">
+        <div class="flex justify-center w-100 h-36 rounded border border-slate-600">
+          Plus
         </div>
       </div>
-      <div v-else>
-        <div>
-          <input type="text" class="text-black" v-model="albumName">
+      <div v-for="(album, i) in albums" :key="i" class="border p-2">
+        <div v-if="!isEditing(album.id)"
+          @dblclick.stop.prevent="editItem(album)"
+        >
+          <div>
+            {{ album.name }}
+          </div>
+          <div>
+            {{ album.expiry_date }}
+          </div>
+        </div>
+        <div v-else>
+          <div>
+            <input type="text" class="text-black" v-model="albumName">
+          </div>
+          <div>
+            <input type="date" class="text-black" v-model="albumExpiryDate">
+          </div>
         </div>
         <div>
-          <input type="date" class="text-black" v-model="albumExpiryDate">
+          <button @click="deleteAlbum(album)">Delete</button>
         </div>
-      </div>
-      <div>
-        <button @click="deleteAlbum(album)">Delete</button>
       </div>
     </div>
   </div>
