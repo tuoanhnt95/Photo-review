@@ -1,5 +1,5 @@
 <template>
-  <div class="relative px-6 pt-12 pb-8 bg-white dark:bg-slate-800 border rounded">
+  <div class="relative px-6 pt-16 pb-8 bg-white dark:bg-slate-800 border rounded">
     <div class="flex place-content-between w-full mb-6">
       <input type="text" v-model="albumName" placeholder="Album name"
         class="w-full px-2 py-1 text-xl text-black rounded"
@@ -7,19 +7,19 @@
     </div>
 
     <div class="flex place-content-between mb-4">
-      <label for="expiry-date">Expiry date</label>
-      <input type="date" v-model="albumExpiryDate" class="pl-1 text-black rounded">
+      <label for="expiry-date" class="self-center text-lg">Expiry date</label>
+      <input type="date" v-model="albumExpiryDate" class="pl-1 rounded text-lg text-black">
     </div>
 
     <div class="flex place-content-between w-full mb-4">
-      <label for="invitee">Invitee</label>
-      <input type="text" placeholder=" reviewer@gmail.com,..." v-model="invitees" class="w-3/4 pl-1 text-black rounded">
+      <label for="invitee" class="self-center text-lg">Invitee</label>
+      <input type="text" placeholder=" reviewer@gmail.com,..." v-model="invitees" class="w-3/4 pl-1 rounded text-lg text-black">
     </div>
 
-    <div class="mb-2">
+    <div class="mb-2 text-lg">
       Upload photos
     </div>
-    <div class="flex justify-center">
+    <div class="flex justify-center mb-2">
       <input type="file" multiple>
     </div>
 

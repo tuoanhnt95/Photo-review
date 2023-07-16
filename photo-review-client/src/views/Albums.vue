@@ -1,51 +1,52 @@
 <template>
   <div class="bg-white dark:bg-slate-800 text-slate-900 dark:text-white">
-    <div class="mb-2 text-xl font-bold text-violet-600 z-0">
-      Albums
-    </div>
-    <div class="grid grid-cols-2 gap-3 md:grid-cols-4 lg:grid-cols-6 mb-6 z-0">
-      <div class="w-36 h-44" @click="creatingAlbum = true">
-        <div class="flex w-100 h-36 rounded border border-slate-600 cursor-pointer">
-          <font-awesome-icon icon="fa-solid fa-plus" class="m-auto text-violet-600"/>
+    <div :class="{'opacity-25': creatingAlbum}">
+      <div class="mb-2 text-xl font-bold text-violet-600 z-0">
+        Albums
+      </div>
+      <div class="grid grid-cols-2 gap-3 md:grid-cols-4 lg:grid-cols-6 mb-6 z-0">
+        <div class="w-36 h-44" @click="creatingAlbum = true">
+          <div class="flex w-100 h-36 rounded border border-slate-600 cursor-pointer">
+            <font-awesome-icon icon="fa-solid fa-plus" class="m-auto text-violet-600"/>
+          </div>
+          <div class="pt-1 text-xs text-slate-400">
+            New album
+          </div>
         </div>
-        <div class="pt-1 text-xs text-slate-400">
-          New album
+        <div v-for="(album, i) in albums" :key="i">
+          <div v-if="!isEditing(album.id)"
+            class="w-36 h-46 cursor-pointer"
+            @dblclick.stop.prevent="editItem(album)"
+          >
+            <div class="flex relative w-100 h-36 rounded border border-slate-600 cursor-pointer">
+              Cover Photo
+              <font-awesome-icon icon="fa-solid fa-x"
+                class="absolute top-1 right-1 text-slate-400"
+                @click="deleteAlbum(album)"
+              />
+            </div>
+            <div class="pl-1 text-md truncate">
+              {{ album.name }}
+            </div>
+            <div class="pl-1 text-xs text-slate-400">
+              Expire: {{ album.expiry_date }}
+            </div>
+          </div>
+          <div v-else>
+            <div>
+              <input type="text" class="text-black" v-model="albumName">
+            </div>
+            <div>
+              <input type="date" class="text-black" v-model="albumExpiryDate">
+            </div>
+          </div>
         </div>
       </div>
-      <div v-for="(album, i) in albums" :key="i">
-        <div v-if="!isEditing(album.id)"
-          class="w-36 h-46 cursor-pointer"
-          @dblclick.stop.prevent="editItem(album)"
-        >
-          <div class="flex relative w-100 h-36 rounded border border-slate-600 cursor-pointer">
-            Cover Photo
-            <font-awesome-icon icon="fa-solid fa-x"
-              class="absolute top-1 right-1 text-slate-400"
-              @click="deleteAlbum(album)"
-            />
-          </div>
-          <div class="pl-1 text-md truncate">
-            {{ album.name }}
-          </div>
-          <div class="pl-1 text-xs text-slate-400">
-            Expire: {{ album.expiry_date }}
-          </div>
-        </div>
-        <div v-else>
-          <div>
-            <input type="text" class="text-black" v-model="albumName">
-          </div>
-          <div>
-            <input type="date" class="text-black" v-model="albumExpiryDate">
-          </div>
-        </div>
-      </div>
     </div>
-
     <AlbumCreate v-if="creatingAlbum"
       :albums="albums"
       @closeCreateAlbum="creatingAlbum = false"
-      class="absolute top-[-50vh] left-0 w-full z-10"
+      class="absolute top-[-500px] left-0 w-full z-10"
     >
     </AlbumCreate>
   </div>
@@ -164,3 +165,7 @@ const deleteAlbum = async(album: Album) => {
     })
 }
 </script>
+
+<style scoped>
+
+</style>
