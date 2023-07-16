@@ -1,8 +1,10 @@
 <template>
   <div class="bg-white dark:bg-slate-800 text-slate-900 dark:text-white">
-    <div class="mb-2 text-xl font-bold text-violet-600">Albums</div>
-    <div class="grid grid-cols-2 gap-3 md:grid-cols-4 lg:grid-cols-6 mb-6">
-      <div class="w-36 h-44" @click="createAlbum()">
+    <div class="mb-2 text-xl font-bold text-violet-600 z-0">
+      Albums
+    </div>
+    <div class="grid grid-cols-2 gap-3 md:grid-cols-4 lg:grid-cols-6 mb-6 z-0">
+      <div class="w-36 h-44" @click="creatingAlbum = true">
         <div class="flex w-100 h-36 rounded border border-slate-600 cursor-pointer">
           <font-awesome-icon icon="fa-solid fa-plus" class="m-auto text-violet-600"/>
         </div>
@@ -39,20 +41,16 @@
         </div>
       </div>
     </div>
+
+    <AlbumCreate v-if="creatingAlbum"
+      :albums="albums"
+      @closeCreateAlbum="creatingAlbum = false"
+      class="absolute top-[-50vh] left-0 w-full z-10"
+    >
+    </AlbumCreate>
   </div>
+
   <div class="border border-white p-2">
-    <div>Add new album</div>
-    <div>
-      <label for="album-name">Name</label>
-      <input type="text" class="text-black" v-model="albumName">
-    </div>
-    <div>
-      <label for="album-expiry-date">Expiry date</label>
-      <input type="date" class="text-black" v-model="albumExpiryDate">
-    </div>
-    <div>
-      <label for="invitee">Invitee</label>
-    </div>
     <div>
       <button @click="saveEditAlbum()">Save Edit</button>
     </div>
@@ -65,6 +63,8 @@
 <script setup lang="ts">
 import { computed, onMounted, ref, type PropType } from 'vue';
 import axios from 'axios';
+
+import AlbumCreate from '../components/AlbumCreate.vue';
 
 interface Album {
   id: number,
@@ -79,7 +79,6 @@ let currentEditItem = ref<Album>({
   expiry_date: new Date()
 }); // empty object
 
-
 onMounted(async () => {
   await axios
     .get('http://localhost:3000/albums')
@@ -90,9 +89,11 @@ onMounted(async () => {
     })
 });
 
+const creatingAlbum = ref(false);
 const albumName = ref('');
 const albumExpiryDate = ref('');
 const createAlbum = async() => {
+  creatingAlbum.value = true;
   await axios
     .post('http://localhost:3000/albums', {
       name: albumName.value,
