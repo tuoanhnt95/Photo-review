@@ -21,6 +21,8 @@
   --vt-c-text-dark-2: rgba(235, 235, 235, 0.64);
 
   --slate-800: rgb(30 41 59);
+  --violet-600: #7c3aed;
+  --violet-800: #5b21b6;
 }
 
 /* semantic color variables for this project */
@@ -36,6 +38,8 @@
   --color-text: var(--vt-c-text-light-1);
 
   --section-gap: 160px;
+  --color-primary: var(--violet-600);
+  --color-primary-dark: var(--violet-800);
 }
 
 @media (prefers-color-scheme: dark) {

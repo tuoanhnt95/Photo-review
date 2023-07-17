@@ -1,11 +1,12 @@
 <template>
-  <Albums></Albums>
-  <!-- <RouterView /> -->
+  <NavigationBar class="fixed bottom-0 left-0 z-50"></NavigationBar>
+  <RouterView></RouterView>
+
+  <!-- @closeCreateAlbum="creatingAlbum = false" @addNewAlbum="addNewAlbum" -->
 </template>
 
 <script setup lang="ts">
-import Albums from './views/Albums.vue'
-
+import NavigationBar from './components/NavigationBar.vue'
 </script>
 
 <style scoped>
