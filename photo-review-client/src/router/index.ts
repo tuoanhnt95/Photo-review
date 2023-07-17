@@ -1,6 +1,7 @@
 import { createRouter, createWebHistory } from 'vue-router'
-import HomeView from '../views/HomeView.vue'
+// import HomeView from '../views/HomeView.vue'
 import Albums from '@/views/Albums.vue'
+// import Album from '@/views/Album.vue'
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -8,9 +9,9 @@ const router = createRouter({
     {
       path: '/',
       name: 'home',
-      component: HomeView
-    },
-    // {
+      component: Albums
+    }
+    // ,{
     //   path: '/about',
     //   name: 'about',
     //   // route level code-splitting
@@ -22,6 +23,11 @@ const router = createRouter({
       path: '/albums',
       name: 'Albums',
       component: Albums
+    }
+    ,{
+      path: '/albums/:id',
+      name: 'Album',
+      component: () => import('../views/Album.vue')
     }
   ]
 })

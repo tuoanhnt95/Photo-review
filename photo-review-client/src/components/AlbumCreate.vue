@@ -24,7 +24,7 @@
     </div>
 
     <div class="w-full">
-      <button @click="createAlbum" class="w-full mt-4 py-3 bg-violet-800 text-slate-200 rounded text-xl font-bold cursor-pointer">
+      <button @click="createAlbum" class="w-full mt-4 py-3 bg-violet-600 text-slate-200 rounded text-xl font-bold cursor-pointer">
         Save
       </button>
     </div>

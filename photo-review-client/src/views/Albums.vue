@@ -4,7 +4,9 @@
       <div class="mb-2 text-xl font-bold text-violet-600 z-0">
         Albums
       </div>
+
       <div class="grid grid-cols-2 gap-3 md:grid-cols-4 lg:grid-cols-6 mb-6 z-0">
+
         <div class="w-36 h-44" @click="creatingAlbum = true">
           <div class="flex w-100 h-36 rounded border border-slate-600 cursor-pointer">
             <font-awesome-icon icon="fa-solid fa-plus" class="m-auto text-violet-600"/>
@@ -13,25 +15,29 @@
             New album
           </div>
         </div>
+
         <div v-for="(album, i) in albums" :key="i">
           <div v-if="!isEditing(album.id)"
             class="w-36 h-46 cursor-pointer"
             @dblclick.stop.prevent="editItem(album)"
           >
-            <div class="flex relative w-100 h-36 rounded border border-slate-600 cursor-pointer">
-              Cover Photo
-              <font-awesome-icon icon="fa-solid fa-x"
-                class="absolute top-1 right-1 text-slate-400"
-                @click="deleteAlbum(album)"
-              />
-            </div>
-            <div class="pl-1 text-md truncate">
-              {{ album.name }}
-            </div>
-            <div class="pl-1 text-xs text-slate-400">
-              Expire: {{ album.expiry_date }}
-            </div>
+            <RouterLink :to="{ name: 'Album', params: { id: album.id } }">
+              <div class="flex relative w-100 h-36 rounded border border-slate-600 cursor-pointer">
+                Cover Photo
+                <font-awesome-icon icon="fa-solid fa-x"
+                  class="absolute top-1 right-1 text-slate-400"
+                  @click="deleteAlbum(album)"
+                />
+              </div>
+              <div class="pl-1 text-md truncate">
+                {{ album.name }}
+              </div>
+              <div class="pl-1 text-xs text-slate-400">
+                Expire: {{ album.expiry_date }}
+              </div>
+            </RouterLink>
           </div>
+
           <div v-else>
             <div>
               <input type="text" class="text-black" v-model="albumName">
@@ -43,6 +49,7 @@
         </div>
       </div>
     </div>
+
     <AlbumCreate v-if="creatingAlbum"
       :albums="albums"
       @closeCreateAlbum="creatingAlbum = false"
@@ -63,6 +70,7 @@
 
 <script setup lang="ts">
 import { computed, onMounted, ref, type PropType } from 'vue';
+import { RouterLink } from 'vue-router';
 import axios from 'axios';
 
 import AlbumCreate from '../components/AlbumCreate.vue';
