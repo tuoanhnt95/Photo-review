@@ -29,7 +29,7 @@
                   @click="deleteAlbum(album)"
                 />
               </div>
-              <div class="pl-1 text-md truncate">
+              <div class="pl-1 text-md truncate text-slate-800">
                 {{ album.name }}
               </div>
               <div class="pl-1 text-xs text-slate-400">
