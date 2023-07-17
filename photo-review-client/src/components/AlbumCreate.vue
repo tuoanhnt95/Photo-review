@@ -57,6 +57,7 @@ const $emit = defineEmits(['closeCreateAlbum', 'addNewAlbum']);
 const albumName = ref('');
 const albumExpiryDate = ref('');
 const invitees = ref([]);
+
 const createAlbum = async() => {
   await axios
     .post('http://localhost:3000/albums', {

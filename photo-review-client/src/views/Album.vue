@@ -1,11 +1,58 @@
 <template>
   <div>
-    Album name {{ $route.params.id }}
-    <div>Edit button</div>
-    <div>Expiry Date</div>
-    <div>Filter</div>
-    <div>
-      List all photos
+    <div class="flex justify-between mx-8 mt-4">
+      <div v-if="!isEditing" class="label-text">
+        {{ album.name }}
+      </div>
+      <div v-else class="label-text">
+        <input type="text" v-model="albumName" class="pl-2 rounded text-black" >
+      </div>
+
+      <div v-if="!isEditing" class="flex">
+        <font-awesome-icon icon="fa-solid fa-pen"
+          class="self-center text-slate-400"
+          @click="startEditingAlbum"
+        />
+      </div>
+      <div v-else class="flex space-x-6 self-center">
+        <font-awesome-icon icon="fa-solid fa-floppy-disk"
+          @click="saveEditAlbum()"
+        />
+        <font-awesome-icon icon="fa-solid fa-x"
+          @click="cancelEditAlbum()"
+        />
+      </div>
+    </div>
+
+    <div class="flex justify-between ml-3 mr-8">
+      <div class="flex">
+        <font-awesome-icon icon="fa-solid fa-calendar-days" class="mr-2 self-center"/>
+        <div v-if="!isEditing" class="text-slate-400">
+          {{ formatDate(album.expiry_date) }}
+        </div>
+        <div v-else>
+          <input type="date" class="text-black" v-model="albumExpiryDate">
+        </div>
+      </div>
+      <div>Filter</div>
+    </div>
+
+    <div class="grid grid-cols-5 gap-0.5 w-full mt-4">
+      <div class="photo-container flex border border-slate-600 cursor-pointer">
+        <font-awesome-icon icon="fa-solid fa-plus" class="m-auto text-violet-600"/>
+      </div>
+      <div class="photo-container flex border border-slate-600 cursor-pointer">
+        <font-awesome-icon icon="fa-solid fa-plus" class="m-auto text-violet-600"/>
+      </div>
+      <div class="photo-container flex border border-slate-600 cursor-pointer">
+        <font-awesome-icon icon="fa-solid fa-plus" class="m-auto text-violet-600"/>
+      </div>
+      <div class="photo-container flex border border-slate-600 cursor-pointer">
+        <font-awesome-icon icon="fa-solid fa-plus" class="m-auto text-violet-600"/>
+      </div>
+      <div class="photo-container flex border border-slate-600 cursor-pointer">
+        <font-awesome-icon icon="fa-solid fa-plus" class="m-auto text-violet-600"/>
+      </div>
     </div>
   </div>
 </template>
@@ -13,18 +60,84 @@
 <script setup lang="ts">
 import { computed, onMounted, ref, type PropType } from 'vue';
 import { useRoute } from 'vue-router';
+import axios from 'axios';
 
 const route = useRoute();
 
-const destinationId = computed(() => {
-  const id = route.params.id;
-  console.log(id)
-  return id;
+onMounted(async() => {
+  await axios
+    .get(`http://localhost:3000/albums/${destinationId.value}`)
+    .then((response) => {
+      album.value = response.data;
+      // TODO: improve, not bug - fix album date format to be YYYY-MM-DD when reloading page
+    })
+    .catch((error) => {
+      console.log(error);
+    });
 });
 
-// const albumName = computed(() => {
-//   return albums.value.filter((album) => {
-//     return album.name.toLowerCase().includes(filter.value.toLowerCase());
-//   });
-// });
+interface Album {
+  id: number,
+  name: string,
+  expiry_date: Date
+}
+
+const album = ref<Album>({
+  id: 0,
+  name: '',
+  expiry_date: new Date()
+});
+
+const destinationId = computed(() => {
+  const id = route.params.id;
+  if (typeof id === 'string') {
+    return parseInt(id);
+  }
+  return parseInt(id[0]);
+});
+
+const isEditing = ref(false);
+const albumName = ref('');
+const albumExpiryDate = ref(new Date());
+
+const startEditingAlbum = () => {
+  isEditing.value = true;
+  albumName.value = album.value.name;
+  albumExpiryDate.value = album.value.expiry_date;
+}
+
+const cancelEditAlbum = () => {
+  albumName.value = '';
+  albumExpiryDate.value = new Date();
+  isEditing.value = false;
+}
+
+const saveEditAlbum = async() => {
+  await axios
+    .patch('http://localhost:3000/albums/' + destinationId.value, {
+      name: albumName.value,
+      expiry_date: albumExpiryDate.value
+    })
+    .then((response) => {
+      album.value.name = albumName.value;
+      album.value.expiry_date = albumExpiryDate.value;
+      cancelEditAlbum();
+    }).catch((error) => {
+      console.log(error);
+    })
+}
+
+const formatDate = (date: Date) => {
+  date = new Date(date);
+  return date.toISOString().split('T')[0];
+}
 </script>
+
+<style scoped>
+@import '../assets/main.css';
+
+.photo-container {
+  aspect-ratio : 1 / 1;
+  width: 100%;
+}
+</style>

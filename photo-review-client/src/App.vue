@@ -1,8 +1,6 @@
 <template>
   <NavigationBar class="fixed bottom-0 left-0 z-50"></NavigationBar>
-  <RouterView></RouterView>
-
-  <!-- @closeCreateAlbum="creatingAlbum = false" @addNewAlbum="addNewAlbum" -->
+  <RouterView class="absolute left-0 top-0 w-full h-full"></RouterView>
 </template>
 
 <script setup lang="ts">

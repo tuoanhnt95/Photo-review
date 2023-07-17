@@ -78,4 +78,11 @@ body {
   -moz-osx-font-smoothing: grayscale;
 }
 
-@media screen and ()
+.label-text {
+  display: block;
+  margin-bottom: 0.5rem;
+  font-size: 1.25rem; /* 20px */
+  line-height: 1.75rem; /* 28px */
+  font-weight: 600;
+  color: var(--color-primary);
+}
