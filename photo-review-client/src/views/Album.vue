@@ -39,7 +39,7 @@
 
     <div class="grid grid-cols-5 gap-0.5 w-full mt-4">
       <div class="photo-container flex border border-slate-600 cursor-pointer">
-        <font-awesome-icon icon="fa-solid fa-plus" class="m-auto text-violet-600"/>
+        <AdvancedImage :cldImg="myImg"/>
       </div>
       <div class="photo-container flex border border-slate-600 cursor-pointer">
         <font-awesome-icon icon="fa-solid fa-plus" class="m-auto text-violet-600"/>
@@ -61,8 +61,24 @@
 import { computed, onMounted, ref, type PropType } from 'vue';
 import { useRoute } from 'vue-router';
 import axios from 'axios';
+import { CloudinaryImage } from '@cloudinary/url-gen/assets/CloudinaryImage';
+import { Cloudinary } from '@cloudinary/url-gen';
+import { AdvancedImage } from '@cloudinary/vue';
+import { fill } from '@cloudinary/url-gen/actions/resize';
+// import { CloudinaryVue } from '@cloudinary/vue/src/components/CloudinaryVue';
 
 const route = useRoute();
+const cld = new Cloudinary({
+  cloud: {
+    cloudName: 'demo',
+  },
+});
+
+// Instantiate a CloudinaryImage object for the image with the public ID, 'docs/models'.
+const myImg = cld.image("docs/models");
+
+// Resize to 250 x 250 pixels using the 'fill' crop mode.
+// myImg.resize(fill().width(250).height(250));
 
 onMounted(async() => {
   await axios
