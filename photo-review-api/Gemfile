@@ -55,3 +55,10 @@ gem "cloudinary"
 
 # Use devise to authenticate users
 gem "devise"
+
+# Use vips to reformat RAW images
+# https://www.rubydoc.info/gems/ruby-vips
+gem "ruby-vips"
+
+# Use mini_magick to reformat .ARW file
+gem "mini_magick"
