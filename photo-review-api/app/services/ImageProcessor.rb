@@ -18,31 +18,13 @@ class ImageProcessor < ActionController::API
   end
 
   def convert
-    # if file is not image -> error
-    # if file is raw file, convert to .jpg using magickload
-    # else, convert to .jpg using ffmpeg
-    # give error if fail
-
-    # Fujifilm .RAF takes a very long time to convert (about 20 seconds)
-    # does not work with Leica .DNG
-    # test with raw file over 5MB
     file = 'file_example_JPG_1MB.jpeg'
     use_magicload = image_uses_magicload(file)
     image = if use_magicload
               MiniMagick::Image.new(file).format 'jpg'
             else
-              p '1'
               Vips::Image.new_from_file file
-              # new_file = Vips::Image.new_from_file file
-              # if image_extension(file) == 'jpg' || image_extension(file) == 'jpeg'
-              #   new_file
-              # else
-              #   file_name = image_name(file)
-              #   new_file.write_to_file file_name # convert to jpg
-              #   Vips::Image.new_from_file file_name
-              # end
             end
-    # resize_image(image, use_magicload, 1).write_to_file 'Image_testDNG.jpg'
     result = resize_image(image, use_magicload, 3)
 
     unless use_magicload
