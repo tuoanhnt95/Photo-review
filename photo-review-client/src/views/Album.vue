@@ -38,22 +38,26 @@
     </div>
 
     <div class="grid grid-cols-5 gap-0.5 w-full mt-4">
+      <div @click="isUploadingPhoto = true" class="photo-container flex border border-slate-600 cursor-pointer">
+        <font-awesome-icon icon="fa-solid fa-plus" class="m-auto text-violet-600"/>
+      </div>
       <div class="photo-container flex border border-slate-600 cursor-pointer">
         <AdvancedImage :cldImg="myImg"/>
       </div>
-      <div class="photo-container flex border border-slate-600 cursor-pointer">
-        <font-awesome-icon icon="fa-solid fa-plus" class="m-auto text-violet-600"/>
-      </div>
-      <div class="photo-container flex border border-slate-600 cursor-pointer">
-        <font-awesome-icon icon="fa-solid fa-plus" class="m-auto text-violet-600"/>
-      </div>
-      <div class="photo-container flex border border-slate-600 cursor-pointer">
-        <font-awesome-icon icon="fa-solid fa-plus" class="m-auto text-violet-600"/>
-      </div>
-      <div class="photo-container flex border border-slate-600 cursor-pointer">
-        <font-awesome-icon icon="fa-solid fa-plus" class="m-auto text-violet-600"/>
+      <div v-for="(photo, i) in photos" :key="i"
+        class="photo-container flex border border-slate-600 cursor-pointer"
+      >
+        <img :src="photo" class="object-cover w-full h-full">
       </div>
     </div>
+
+    <PhotoUpload v-if="isUploadingPhoto"
+      :albumId="album.id"
+      class="absolute w-full z-10"
+      @uploaded-new-photo="reloadAlbum"
+      @close-upload-photo="isUploadingPhoto = false"
+    >
+    </PhotoUpload>
   </div>
 </template>
 
@@ -66,6 +70,8 @@ import { Cloudinary } from '@cloudinary/url-gen';
 import { AdvancedImage } from '@cloudinary/vue';
 import { fill } from '@cloudinary/url-gen/actions/resize';
 // import { CloudinaryVue } from '@cloudinary/vue/src/components/CloudinaryVue';
+
+import PhotoUpload from '../components/PhotoUpload.vue';
 
 const route = useRoute();
 const cld = new Cloudinary({
@@ -82,7 +88,7 @@ const myImg = cld.image("docs/models");
 
 onMounted(async() => {
   await axios
-    .get(`http://localhost:3000/albums/${destinationId.value}`)
+    .get(`http://localhost:3000/albums/${albumId.value}`)
     .then((response) => {
       album.value = response.data;
       // TODO: improve, not bug - fix album date format to be YYYY-MM-DD when reloading page
@@ -104,13 +110,15 @@ const album = ref<Album>({
   expiry_date: new Date()
 });
 
-const destinationId = computed(() => {
+const albumId = computed(() => {
   const id = route.params.id;
   if (typeof id === 'string') {
     return parseInt(id);
   }
   return parseInt(id[0]);
 });
+
+const isUploadingPhoto = ref(false);
 
 const isEditing = ref(false);
 const albumName = ref('');
@@ -130,7 +138,7 @@ const cancelEditAlbum = () => {
 
 const saveEditAlbum = async() => {
   await axios
-    .patch('http://localhost:3000/albums/' + destinationId.value, {
+    .patch('http://localhost:3000/albums/' + albumId.value, {
       name: albumName.value,
       expiry_date: albumExpiryDate.value
     })
@@ -146,6 +154,26 @@ const saveEditAlbum = async() => {
 const formatDate = (date: Date) => {
   date = new Date(date);
   return date.toISOString().split('T')[0];
+}
+
+const photos = ref([]);
+// const computed_photos = computed(() => {
+//   return photos.value.map((photo: any) => {
+//     return {
+//       ...photo,
+//       url: photo.url.replace('upload', 'upload/w_250,h_250,c_fill')
+//     }
+//   })
+// });
+const reloadAlbum = async() => {
+  await axios
+    .get(`http://localhost:3000/albums/${albumId.value}/photos`)
+    .then((response) => {
+      photos.value = response.data;
+    })
+    .catch((error) => {
+      console.log(error);
+    });
 }
 </script>
 

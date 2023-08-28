@@ -5,8 +5,10 @@ class Photo < ApplicationRecord
 
   # validates :name, presence: true
   # validates :url, presence: true
-  # validates :album_id, presence: true
+  validates :album_id, presence: true
   # validates :review_id, presence: true
   validates :created_at, presence: true
   validates :updated_at, presence: true
+
+  has_one_attached :image
 end

@@ -16,13 +16,6 @@
       <input type="text" placeholder=" reviewer@gmail.com,..." v-model="invitees" class="w-3/4 pl-1 rounded text-lg text-black">
     </div>
 
-    <div class="mb-2 text-lg">
-      Upload photos
-    </div>
-    <div class="flex justify-center mb-2">
-      <input type="file" multiple>
-    </div>
-
     <div class="w-full">
       <button @click="createAlbum" class="w-full mt-4 py-3 bg-violet-600 text-slate-200 rounded text-xl font-bold cursor-pointer">
         Save
