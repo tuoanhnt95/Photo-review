@@ -42,7 +42,7 @@
     <AlbumCreate v-if="isCreatingAlbum"
       :albums="albums"
       @closeCreateAlbum="isCreatingAlbum = false"
-      class="absolute top-[-500px] left-0 w-full z-10"
+      class="absolute top-[-200px] left-0 w-full z-10"
     >
     </AlbumCreate>
   </div>
