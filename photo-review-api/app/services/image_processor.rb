@@ -49,8 +49,11 @@ class ImageProcessor < ApplicationService
     jpg_converted_file_name = image_name(file_name)
 
     resized_image.write_to_file jpg_converted_file_name unless image_is_jpg(file_name)
+    result = upload_image_to_cloudinary(jpg_converted_file_name)
 
-    upload_image_to_cloudinary(jpg_converted_file_name)
+    File.delete(jpg_converted_file_name)
+
+    result
   end
 
   def upload_image_to_cloudinary(image_path)
