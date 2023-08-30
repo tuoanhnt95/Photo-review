@@ -41,13 +41,11 @@
       <div @click="isUploadingPhoto = true" class="photo-container flex border border-slate-600 cursor-pointer">
         <font-awesome-icon icon="fa-solid fa-plus" class="m-auto text-violet-600"/>
       </div>
-      <div class="photo-container flex border border-slate-600 cursor-pointer">
-        <AdvancedImage :cldImg="myImg"/>
-      </div>
       <div v-for="(photo, i) in photos" :key="i"
         class="photo-container flex border border-slate-600 cursor-pointer"
       >
-        <img :src="photo" class="object-cover w-full h-full">
+        <AdvancedImage :cldImg="getCloudinaryImage(photo)"/>
+        <!-- <img :src="photo" class="object-cover w-full h-full"> -->
       </div>
     </div>
 
@@ -62,29 +60,19 @@
 </template>
 
 <script setup lang="ts">
-import { computed, onMounted, ref, type PropType } from 'vue';
+import { computed, onMounted, ref } from 'vue';
 import { useRoute } from 'vue-router';
 import axios from 'axios';
-import { CloudinaryImage } from '@cloudinary/url-gen/assets/CloudinaryImage';
 import { Cloudinary } from '@cloudinary/url-gen';
 import { AdvancedImage } from '@cloudinary/vue';
-import { fill } from '@cloudinary/url-gen/actions/resize';
-// import { CloudinaryVue } from '@cloudinary/vue/src/components/CloudinaryVue';
-
 import PhotoUpload from '../components/PhotoUpload.vue';
 
 const route = useRoute();
 const cld = new Cloudinary({
   cloud: {
-    cloudName: 'demo',
+    cloudName: 'djnvimner',
   },
 });
-
-// Instantiate a CloudinaryImage object for the image with the public ID, 'docs/models'.
-const myImg = cld.image("docs/models");
-
-// Resize to 250 x 250 pixels using the 'fill' crop mode.
-// myImg.resize(fill().width(250).height(250));
 
 onMounted(async() => {
   await axios
@@ -104,6 +92,18 @@ interface Album {
   expiry_date: Date
 }
 
+interface Photo {
+  id: number,
+  image: string,
+  album_id: number,
+  created_at: Date,
+  updated_at: Date
+}
+
+const getCloudinaryImage = (photo: Photo) => {
+  return cld.image(`photo_review/${photo.image}`);
+}
+
 const album = ref<Album>({
   id: 0,
   name: '',
@@ -112,14 +112,11 @@ const album = ref<Album>({
 
 const albumId = computed(() => {
   const id = route.params.id;
-  if (typeof id === 'string') {
-    return parseInt(id);
-  }
-  return parseInt(id[0]);
+  return typeof id === 'string' ? parseInt(id) : parseInt(id[0]);
 });
 
-const isUploadingPhoto = ref(false);
 
+const isUploadingPhoto = ref(false);
 const isEditing = ref(false);
 const albumName = ref('');
 const albumExpiryDate = ref(new Date());
@@ -142,7 +139,7 @@ const saveEditAlbum = async() => {
       name: albumName.value,
       expiry_date: albumExpiryDate.value
     })
-    .then((response) => {
+    .then(() => {
       album.value.name = albumName.value;
       album.value.expiry_date = albumExpiryDate.value;
       cancelEditAlbum();
@@ -156,20 +153,27 @@ const formatDate = (date: Date) => {
   return date.toISOString().split('T')[0];
 }
 
-const photos = ref([]);
-// const computed_photos = computed(() => {
-//   return photos.value.map((photo: any) => {
-//     return {
-//       ...photo,
-//       url: photo.url.replace('upload', 'upload/w_250,h_250,c_fill')
-//     }
-//   })
-// });
+const photos = computed (() => {
+  return photoData.value
+});
+
+const photoData = ref([]);
+onMounted(async() => {
+  await axios
+    .get(`http://localhost:3000/albums/${albumId.value}/photos`)
+    .then((response) => {
+      photoData.value = response.data;
+    })
+    .catch((error) => {
+      console.log(error);
+    });
+});
+
 const reloadAlbum = async() => {
   await axios
     .get(`http://localhost:3000/albums/${albumId.value}/photos`)
     .then((response) => {
-      photos.value = response.data;
+      photoData.value = response.data;
     })
     .catch((error) => {
       console.log(error);

@@ -1,5 +1,3 @@
-require 'open-uri'
-
 class PhotosController < ApplicationController
   before_action :set_photo, only: %i[ show update destroy ]
   skip_before_action :verify_authenticity_token
@@ -19,26 +17,12 @@ class PhotosController < ApplicationController
 
   # POST /albums/:album_id/photos
   def create
-    p 'photo_params'
-    image_urls = ImageProcessor.call(photo_params)
-
-    # save the urls to the database
-    image_urls.each do |url|
-      @photo = Photo.new(photo_params[:album_id])
-      if @photo.save
-        file_cloudinary_url = URI.open(url)
-        @photo.image.attach(
-          io: file_cloudinary_url,
-          filename: url.split('/').last.split('.').first,
-          content_type: 'image/jpg'
-        )
-        redirect to @photo, notice: 'Uploaded successfully.'
-      else
-        render json: @photo.errors, status: :unprocessable_entity
-      end
+    processed_images = ImageProcessor.call(photo_params)
+    processed_images.each do |img|
+      @photo = Photo.new({ album_id: photo_params[:album_id], image: img })
+      return false unless @photo.save
     end
-    p 'image_urls after saving in dtb'
-    p image_urls
+    true
   end
 
   # PATCH/PUT /albums/:album_id/photos/:id
@@ -56,13 +40,14 @@ class PhotosController < ApplicationController
   end
 
   private
-    # Use callbacks to share common setup or constraints between actions.
-    def set_photo
-      @photo = Photo.find(params[:id])
-    end
 
-    # Only allow a list of trusted parameters through.
-    def photo_params
-      params.permit(:image, :album_id, :upload_option, :files => [])
-    end
+  # Use callbacks to share common setup or constraints between actions.
+  def set_photo
+    @photo = Photo.find(params[:id])
+  end
+
+  # Only allow a list of trusted parameters through.
+  def photo_params
+    params.permit(:image, :album_id, :upload_option, files: [])
+  end
 end
