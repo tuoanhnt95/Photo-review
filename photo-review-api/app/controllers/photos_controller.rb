@@ -1,5 +1,3 @@
-require 'uri'
-
 class PhotosController < ApplicationController
   before_action :set_photo, only: %i[ show update destroy ]
   skip_before_action :verify_authenticity_token
@@ -19,14 +17,9 @@ class PhotosController < ApplicationController
 
   # POST /albums/:album_id/photos
   def create
-    p '-------------------'
-    p 'photo_params'
     processed_images = ImageProcessor.call(photo_params)
     processed_images.each do |img|
-      @photo = Photo.new({
-                           album_id: photo_params[:album_id],
-                           image: img
-                         })
+      @photo = Photo.new({ album_id: photo_params[:album_id], image: img })
       return false unless @photo.save
     end
     true
@@ -58,13 +51,3 @@ class PhotosController < ApplicationController
     params.permit(:image, :album_id, :upload_option, files: [])
   end
 end
-# attach_image_to_photo(@photo, img[0], img[1])
-# def attach_image_to_photo(photo, cloudinary_url, file_name)
-#   file = URI.open(cloudinary_url)
-
-#   photo.image.attach(
-#     io: file,
-#     filename: file_name,
-#     content_type: 'image/jpg'
-#   )
-# end

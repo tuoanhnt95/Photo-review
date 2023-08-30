@@ -60,15 +60,11 @@
 </template>
 
 <script setup lang="ts">
-import { computed, onMounted, ref, type PropType, vModelCheckbox } from 'vue';
+import { computed, onMounted, ref } from 'vue';
 import { useRoute } from 'vue-router';
 import axios from 'axios';
 import { Cloudinary } from '@cloudinary/url-gen';
 import { AdvancedImage } from '@cloudinary/vue';
-// import { CloudinaryImage } from '@cloudinary/url-gen/assets/CloudinaryImage';
-// import { fill } from '@cloudinary/url-gen/actions/resize';
-// import { CloudinaryVue } from '@cloudinary/vue/src/components/CloudinaryVue';
-
 import PhotoUpload from '../components/PhotoUpload.vue';
 
 const route = useRoute();
@@ -103,8 +99,7 @@ interface Photo {
   created_at: Date,
   updated_at: Date
 }
-// Instantiate a CloudinaryImage object for the image with the public ID, 'docs/models'.
-const myImg = cld.image("photo_reviews/models");
+
 const getCloudinaryImage = (photo: Photo) => {
   return cld.image(`photo_review/${photo.image}`);
 }
@@ -117,14 +112,11 @@ const album = ref<Album>({
 
 const albumId = computed(() => {
   const id = route.params.id;
-  if (typeof id === 'string') {
-    return parseInt(id);
-  }
-  return parseInt(id[0]);
+  return typeof id === 'string' ? parseInt(id) : parseInt(id[0]);
 });
 
-const isUploadingPhoto = ref(false);
 
+const isUploadingPhoto = ref(false);
 const isEditing = ref(false);
 const albumName = ref('');
 const albumExpiryDate = ref(new Date());
@@ -147,7 +139,7 @@ const saveEditAlbum = async() => {
       name: albumName.value,
       expiry_date: albumExpiryDate.value
     })
-    .then((response) => {
+    .then(() => {
       album.value.name = albumName.value;
       album.value.expiry_date = albumExpiryDate.value;
       cancelEditAlbum();
@@ -162,17 +154,9 @@ const formatDate = (date: Date) => {
 }
 
 const photos = computed (() => {
-  console.log('photoData:',photoData.value)
   return photoData.value
 });
-// const computed_photos = computed(() => {
-//   return photos.value.map((photo: any) => {
-//     return {
-//       ...photo,
-//       url: photo.url.replace('upload', 'upload/w_250,h_250,c_fill')
-//     }
-//   })
-// });
+
 const photoData = ref([]);
 onMounted(async() => {
   await axios
