@@ -41,13 +41,11 @@
       <div @click="isUploadingPhoto = true" class="photo-container flex border border-slate-600 cursor-pointer">
         <font-awesome-icon icon="fa-solid fa-plus" class="m-auto text-violet-600"/>
       </div>
-      <div class="photo-container flex border border-slate-600 cursor-pointer">
-        <AdvancedImage :cldImg="myImg"/>
-      </div>
       <div v-for="(photo, i) in photos" :key="i"
         class="photo-container flex border border-slate-600 cursor-pointer"
       >
-        <img :src="photo" class="object-cover w-full h-full">
+        <AdvancedImage :cldImg="getCloudinaryImage(photo)"/>
+        <!-- <img :src="photo" class="object-cover w-full h-full"> -->
       </div>
     </div>
 
@@ -62,13 +60,13 @@
 </template>
 
 <script setup lang="ts">
-import { computed, onMounted, ref, type PropType } from 'vue';
+import { computed, onMounted, ref, type PropType, vModelCheckbox } from 'vue';
 import { useRoute } from 'vue-router';
 import axios from 'axios';
-import { CloudinaryImage } from '@cloudinary/url-gen/assets/CloudinaryImage';
 import { Cloudinary } from '@cloudinary/url-gen';
 import { AdvancedImage } from '@cloudinary/vue';
-import { fill } from '@cloudinary/url-gen/actions/resize';
+// import { CloudinaryImage } from '@cloudinary/url-gen/assets/CloudinaryImage';
+// import { fill } from '@cloudinary/url-gen/actions/resize';
 // import { CloudinaryVue } from '@cloudinary/vue/src/components/CloudinaryVue';
 
 import PhotoUpload from '../components/PhotoUpload.vue';
@@ -76,15 +74,9 @@ import PhotoUpload from '../components/PhotoUpload.vue';
 const route = useRoute();
 const cld = new Cloudinary({
   cloud: {
-    cloudName: 'demo',
+    cloudName: 'djnvimner',
   },
 });
-
-// Instantiate a CloudinaryImage object for the image with the public ID, 'docs/models'.
-const myImg = cld.image("docs/models");
-
-// Resize to 250 x 250 pixels using the 'fill' crop mode.
-// myImg.resize(fill().width(250).height(250));
 
 onMounted(async() => {
   await axios
@@ -102,6 +94,19 @@ interface Album {
   id: number,
   name: string,
   expiry_date: Date
+}
+
+interface Photo {
+  id: number,
+  image: string,
+  album_id: number,
+  created_at: Date,
+  updated_at: Date
+}
+// Instantiate a CloudinaryImage object for the image with the public ID, 'docs/models'.
+const myImg = cld.image("photo_reviews/models");
+const getCloudinaryImage = (photo: Photo) => {
+  return cld.image(`photo_review/${photo.image}`);
 }
 
 const album = ref<Album>({
@@ -156,7 +161,10 @@ const formatDate = (date: Date) => {
   return date.toISOString().split('T')[0];
 }
 
-const photos = ref([]);
+const photos = computed (() => {
+  console.log('photoData:',photoData.value)
+  return photoData.value
+});
 // const computed_photos = computed(() => {
 //   return photos.value.map((photo: any) => {
 //     return {
@@ -165,11 +173,23 @@ const photos = ref([]);
 //     }
 //   })
 // });
+const photoData = ref([]);
+onMounted(async() => {
+  await axios
+    .get(`http://localhost:3000/albums/${albumId.value}/photos`)
+    .then((response) => {
+      photoData.value = response.data;
+    })
+    .catch((error) => {
+      console.log(error);
+    });
+});
+
 const reloadAlbum = async() => {
   await axios
     .get(`http://localhost:3000/albums/${albumId.value}/photos`)
     .then((response) => {
-      photos.value = response.data;
+      photoData.value = response.data;
     })
     .catch((error) => {
       console.log(error);

@@ -63,8 +63,7 @@ ActiveRecord::Schema[7.0].define(version: 2023_08_29_134118) do
   end
 
   create_table "photos", force: :cascade do |t|
-    t.decimal "size"
-    t.string "dimension"
+    t.string "image"
     t.bigint "album_id", null: false
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
