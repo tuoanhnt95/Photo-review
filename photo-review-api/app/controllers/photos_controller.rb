@@ -10,7 +10,7 @@ class PhotosController < ApplicationController
     render json: @photos
   end
 
-  # GET /albums/:album_id/photos/:id
+  # GET /photos/:id
   def show
     render json: @photo
   end
@@ -25,7 +25,7 @@ class PhotosController < ApplicationController
     true
   end
 
-  # PATCH/PUT /albums/:album_id/photos/:id
+  # PATCH/PUT /photos/:id
   def update
     if @photo.update(photo_params)
       render json: @photo
@@ -34,7 +34,7 @@ class PhotosController < ApplicationController
     end
   end
 
-  # DELETE /albums/:album_id/photos/:id
+  # DELETE /photos/:id
   def destroy
     @photo.destroy
   end
