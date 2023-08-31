@@ -6,8 +6,13 @@ class AlbumsController < ApplicationController
   # GET /albums
   def index
     @albums = Album.all
+    covers = []
+    @albums.each do |album|
+      album_cover = album.photos.first.image
+      covers.push(album_cover)
+    end
 
-    render json: @albums
+    render json: [@albums, covers]
   end
 
   # GET /albums/1
@@ -43,13 +48,13 @@ class AlbumsController < ApplicationController
   end
 
   private
-    # Use callbacks to share common setup or constraints between actions.
-    def set_album
-      @album = Album.find(params[:id])
-    end
 
-    # Only allow a list of trusted parameters through.
-    def album_params
-      params.require(:album).permit(:name, :expiry_date, :user_id)
-    end
+  def set_album
+    @album = Album.find(params[:id])
+  end
+
+  # Only allow a list of trusted parameters through.
+  def album_params
+    params.require(:album).permit(:name, :expiry_date, :user_id)
+  end
 end

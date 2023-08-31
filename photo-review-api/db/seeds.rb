@@ -52,5 +52,22 @@ Album.create([
                  user_id: User.first.id
                }
              ])
-# photos = Photo.create([])
-# Create a photo
+puts "#{Album.count} albums created."
+
+puts 'Creating photo data...'
+Photo.create([
+               {
+                 image: 't7rmnsrnhlqhjhlqpo6y',
+                 album_id: Album.first.id
+               },
+               {
+                 image: 'g6u80uqgthixbrpwmkxd',
+                 album_id: Album.all[1].id
+               },
+               {
+                 image: 'bfvvvdvmazvayfepwmr1',
+                 album_id: Album.all[2].id
+               }
+             ])
+puts "#{Photo.count} photos created."
+puts 'Finished seeding!'
