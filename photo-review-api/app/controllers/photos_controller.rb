@@ -5,7 +5,7 @@ class PhotosController < ApplicationController
 
   # GET /albums/:album_id/photos
   def index
-    @photos = Photo.all
+    @photos = Photo.where(album_id: params[:album_id])
 
     render json: @photos
   end
