@@ -38,14 +38,13 @@
     </div>
 
     <div class="grid grid-cols-5 gap-0.5 w-full mt-4">
-      <div @click="isUploadingPhoto = true" class="photo-container flex border border-slate-600 cursor-pointer">
+      <div @click="isUploadingPhoto = true" class="photo-container flex">
         <font-awesome-icon icon="fa-solid fa-plus" class="m-auto text-violet-600"/>
       </div>
       <div v-for="(photo, i) in photos" :key="i"
-        class="photo-container flex border border-slate-600 cursor-pointer"
+        class="photo-container flex"
       >
-        <AdvancedImage :cldImg="getCloudinaryImage(photo)"/>
-        <!-- <img :src="photo" class="object-cover w-full h-full"> -->
+        <AdvancedImage :cldImg="getCloudinaryImage(photo.image)" class="object-cover"/>
       </div>
     </div>
 
@@ -65,26 +64,10 @@ import { useRoute } from 'vue-router';
 import axios from 'axios';
 import { Cloudinary } from '@cloudinary/url-gen';
 import { AdvancedImage } from '@cloudinary/vue';
+
 import PhotoUpload from '../components/PhotoUpload.vue';
 
 const route = useRoute();
-const cld = new Cloudinary({
-  cloud: {
-    cloudName: 'djnvimner',
-  },
-});
-
-onMounted(async() => {
-  await axios
-    .get(`http://localhost:3000/albums/${albumId.value}`)
-    .then((response) => {
-      album.value = response.data;
-      // TODO: improve, not bug - fix album date format to be YYYY-MM-DD when reloading page
-    })
-    .catch((error) => {
-      console.log(error);
-    });
-});
 
 interface Album {
   id: number,
@@ -100,15 +83,31 @@ interface Photo {
   updated_at: Date
 }
 
-const getCloudinaryImage = (photo: Photo) => {
-  return cld.image(`photo_review/${photo.image}`);
-}
-
 const album = ref<Album>({
   id: 0,
   name: '',
   expiry_date: new Date()
 });
+onMounted(async() => {
+  await axios
+    .get(`http://localhost:3000/albums/${albumId.value}`)
+    .then((response) => {
+      album.value = response.data;
+      // TODO: improve, not bug - fix album date format to be YYYY-MM-DD when reloading page
+    })
+    .catch((error) => {
+      console.log(error);
+    });
+});
+
+const cld = new Cloudinary({
+  cloud: {
+    cloudName: 'djnvimner',
+  }
+});
+const getCloudinaryImage = (publicId: String) => {
+  return cld.image(`photo_review/${publicId}`);
+}
 
 const albumId = computed(() => {
   const id = route.params.id;
@@ -157,7 +156,7 @@ const photos = computed (() => {
   return photoData.value
 });
 
-const photoData = ref([]);
+const photoData = ref([<Photo>{}]);
 onMounted(async() => {
   await axios
     .get(`http://localhost:3000/albums/${albumId.value}/photos`)
@@ -183,9 +182,4 @@ const reloadAlbum = async() => {
 
 <style scoped>
 @import '../assets/main.css';
-
-.photo-container {
-  aspect-ratio : 1 / 1;
-  width: 100%;
-}
 </style>

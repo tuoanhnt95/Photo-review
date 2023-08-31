@@ -19,8 +19,8 @@
           <div v-for="(album, i) in albums" :key="i">
             <div class="w-36 h-46 cursor-pointer">
               <RouterLink :to="{ name: 'Album', params: { id: album.id } }">
-                <div class="flex relative w-100 h-36 rounded border border-slate-600 cursor-pointer">
-                  Cover Photo
+                <div class="photo-container flex relative h-36 rounded">
+                  <AdvancedImage :cldImg="getCloudinaryImage(covers[i])" class="object-cover"/>
                   <font-awesome-icon icon="fa-solid fa-x"
                     class="absolute top-1 right-1 text-slate-400"
                     @click="deleteAlbum(album)"
@@ -49,9 +49,11 @@
 </template>
 
 <script setup lang="ts">
-import { computed, onMounted, ref, type PropType } from 'vue';
+import { onMounted, ref } from 'vue';
 import { RouterLink } from 'vue-router';
 import axios from 'axios';
+import { Cloudinary } from '@cloudinary/url-gen';
+import { AdvancedImage } from '@cloudinary/vue';
 
 import AlbumCreate from '../components/AlbumCreate.vue';
 
@@ -62,16 +64,26 @@ interface Album {
 }
 
 let albums = ref<Album[]>([]);
-
+let covers = ref<string[]>([]);
 onMounted(async () => {
   await axios
     .get('http://localhost:3000/albums')
     .then((response) => {
-      albums.value = response.data;
+      albums.value = response.data[0];
+      covers.value = response.data[1];
     }).catch((error) => {
       console.log(error);
     })
 });
+
+const cld = new Cloudinary({
+  cloud: {
+    cloudName: 'djnvimner',
+  }
+});
+const getCloudinaryImage = (publicId: String) => {
+  return cld.image(`photo_review/${publicId}`);
+}
 
 const isCreatingAlbum = ref(false);
 
