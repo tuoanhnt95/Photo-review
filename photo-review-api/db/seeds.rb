@@ -30,6 +30,10 @@ User.create([
               {
                 email: 'myspamvn@yahoo.com',
                 password: '123123'
+              },
+              {
+                email: 'photographer@hotmail.com',
+                password: '123123'
               }
             ])
 puts "#{User.count} users created. User info: #{User.first}"
