@@ -45,7 +45,7 @@ const props = defineProps({
   }
 })
 
-const $emit = defineEmits(['closeCreateAlbum', 'addNewAlbum']);
+const $emit = defineEmits(['closeCreateAlbum', 'addedNewAlbum']);
 
 const albumName = ref('');
 const albumExpiryDate = ref('');
@@ -59,8 +59,8 @@ const createAlbum = async() => {
       invitees: invitees.value
     })
     .then((response) => {
-      props.albums.push(response.data);
       closeCreateAlbum();
+      $emit('addedNewAlbum', response.data);
     }).catch((error) => {
       console.log(error);
     })
