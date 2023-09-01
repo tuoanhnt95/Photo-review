@@ -43,7 +43,7 @@
       </div>
       <div v-for="(photo, i) in photos" :key="i" class="relative">
         <RouterLink :to="{ name: 'Photo', params: { id: photo.id } }"
-          class="photo-container flex"
+          class="photo-container flex justify-center"
         >
           <AdvancedImage :cldImg="getCloudinaryImage(photo.image)" class="object-cover"/>
         </RouterLink>
@@ -66,7 +66,7 @@
 </template>
 
 <script setup lang="ts">
-import { computed, onMounted, ref } from 'vue';
+import { computed, onBeforeMount, ref } from 'vue';
 import { RouterLink } from 'vue-router';
 import { useRoute } from 'vue-router';
 import axios from 'axios';
@@ -96,7 +96,7 @@ const album = ref<Album>({
   name: '',
   expiry_date: new Date()
 });
-onMounted(async() => {
+onBeforeMount(async() => {
   await axios
     .get(`http://localhost:3000/albums/${albumId.value}`)
     .then((response) => {
@@ -186,7 +186,7 @@ const photos = computed (() => {
 });
 
 const photosData = ref([<Photo>{}]);
-onMounted(async() => {
+onBeforeMount(async() => {
   await axios
     .get(`http://localhost:3000/albums/${albumId.value}/photos`)
     .then((response) => {
@@ -196,17 +196,6 @@ onMounted(async() => {
       console.log(error);
     });
 });
-
-const reloadAlbum = async() => {
-  await axios
-    .get(`http://localhost:3000/albums/${albumId.value}/photos`)
-    .then((response) => {
-      photosData.value = response.data;
-    })
-    .catch((error) => {
-      console.log(error);
-    });
-}
 </script>
 
 <style scoped>
