@@ -6,13 +6,17 @@ class AlbumsController < ApplicationController
   # GET /albums
   def index
     @albums = Album.all
-    covers = []
+    results = []
+
     @albums.each do |album|
-      album_cover = album.photos.first.image
-      covers.push(album_cover)
+      album_cover = ''
+      album_cover = album.photos.first.image unless album.photos.first.nil?
+      result = album_result(album, album_cover)
+      results.push(result)
     end
 
-    render json: [@albums, covers]
+    # render json: [@albums, covers]
+    render json: results
   end
 
   # GET /albums/1
@@ -48,6 +52,12 @@ class AlbumsController < ApplicationController
   end
 
   private
+
+  def album_result(album, album_cover)
+    album_result = {}.merge(album.attributes)
+    album_result[:cover] = album_cover
+    album_result
+  end
 
   def set_album
     @album = Album.find(params[:id])

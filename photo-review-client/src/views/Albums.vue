@@ -16,14 +16,13 @@
             </div>
           </div>
 
-          <div v-for="(album, i) in albums" :key="i">
-            <div class="w-36 h-46 cursor-pointer">
+          <div v-for="(album, i) in albums" :key="album.id">
+            <div class="relative w-36 h-46 cursor-pointer">
               <RouterLink :to="{ name: 'Album', params: { id: album.id } }">
                 <div class="photo-container flex relative h-36 rounded">
-                  <AdvancedImage :cldImg="getCloudinaryImage(covers[i])" class="object-cover"/>
-                  <font-awesome-icon icon="fa-solid fa-x"
-                    class="absolute top-1 right-1 text-slate-400"
-                    @click="deleteAlbum(album)"
+                  <AdvancedImage v-if="album.cover.length > 0" :cldImg="getCloudinaryImage(album.cover)"
+                    place-holder="predominant-color"
+                    class="object-cover"
                   />
                 </div>
                 <div class="pl-1 text-md truncate text-white">
@@ -33,6 +32,10 @@
                   Expire: {{ album.expiry_date }}
                 </div>
               </RouterLink>
+              <font-awesome-icon icon="fa-solid fa-x"
+                class="absolute top-1 right-1 z-50 text-slate-400"
+                @click="deleteAlbum(album)"
+              />
             </div>
           </div>
         </div>
@@ -49,7 +52,7 @@
 </template>
 
 <script setup lang="ts">
-import { onMounted, ref } from 'vue';
+import { onBeforeMount, ref } from 'vue';
 import { RouterLink } from 'vue-router';
 import axios from 'axios';
 import { Cloudinary } from '@cloudinary/url-gen';
@@ -60,17 +63,17 @@ import AlbumCreate from '../components/AlbumCreate.vue';
 interface Album {
   id: number,
   name: string,
-  expiry_date: Date
+  expiry_date: Date,
+  cover: string
 }
 
 let albums = ref<Album[]>([]);
-let covers = ref<string[]>([]);
-onMounted(async () => {
+onBeforeMount(async () => {
   await axios
     .get('http://localhost:3000/albums')
     .then((response) => {
-      albums.value = response.data[0];
-      covers.value = response.data[1];
+      console.log('all albums', response.data)
+      albums.value = response.data.reverse();
     }).catch((error) => {
       console.log(error);
     })
@@ -95,8 +98,6 @@ const deleteAlbum = async(album: Album) => {
     .delete('http://localhost:3000/albums/' + album.id)
     .then((response) => {
       console.log(response);
-      // find the album that is changed
-      // update the album in the frontend
       const index = albums.value.findIndex((alb: Album) => alb.id === album.id);
       albums.value.splice(index, 1);
     }).catch((error) => {
