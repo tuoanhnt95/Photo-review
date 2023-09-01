@@ -41,17 +41,24 @@
       <div @click="isUploadingPhoto = true" class="photo-container flex">
         <font-awesome-icon icon="fa-solid fa-plus" class="m-auto text-violet-600"/>
       </div>
-      <div v-for="(photo, i) in photos" :key="i"
-        class="photo-container flex"
-      >
-        <AdvancedImage :cldImg="getCloudinaryImage(photo.image)" class="object-cover"/>
+      <div v-for="(photo, i) in photos" :key="i" class="relative">
+        <RouterLink :to="{ name: 'Photo', params: { id: photo.id } }"
+          class="photo-container flex"
+        >
+          <AdvancedImage :cldImg="getCloudinaryImage(photo.image)" class="object-cover"/>
+        </RouterLink>
+        <font-awesome-icon icon="fa-solid fa-x"
+          class="absolute top-1 right-1 z-50 text-slate-400"
+          @click="deletePhoto(photo.id)"
+        />
       </div>
+
     </div>
 
     <PhotoUpload v-if="isUploadingPhoto"
       :albumId="album.id"
       class="absolute w-full z-10"
-      @uploaded-new-photo="reloadAlbum"
+      @uploaded-new-photo="(photos) => addPhoto(photos)"
       @close-upload-photo="isUploadingPhoto = false"
     >
     </PhotoUpload>
@@ -60,6 +67,7 @@
 
 <script setup lang="ts">
 import { computed, onMounted, ref } from 'vue';
+import { RouterLink } from 'vue-router';
 import { useRoute } from 'vue-router';
 import axios from 'axios';
 import { Cloudinary } from '@cloudinary/url-gen';
@@ -114,7 +122,6 @@ const albumId = computed(() => {
   return typeof id === 'string' ? parseInt(id) : parseInt(id[0]);
 });
 
-
 const isUploadingPhoto = ref(false);
 const isEditing = ref(false);
 const albumName = ref('');
@@ -147,21 +154,43 @@ const saveEditAlbum = async() => {
     })
 }
 
+const deletePhoto = async (photoId: number) => {
+  if (confirm('Delete photo?') === false) {
+    return;
+  }
+  await axios
+    .delete('http://localhost:3000/photos/' + photoId)
+    .then(() => {
+      removePhoto(photoId);
+    }).catch((error) => {
+      console.log(error);
+    })
+}
+const removePhoto = (photoId: number) => {
+  const index = photosData.value.findIndex((photo: Photo) => photo.id === photoId);
+  photosData.value.splice(index, 1);
+}
+const addPhoto = (photos: [Photo]) => {
+  photos.forEach(photo => {
+    photosData.value.unshift(photo);
+  });
+}
+
 const formatDate = (date: Date) => {
   date = new Date(date);
   return date.toISOString().split('T')[0];
 }
 
 const photos = computed (() => {
-  return photoData.value
+  return photosData.value
 });
 
-const photoData = ref([<Photo>{}]);
+const photosData = ref([<Photo>{}]);
 onMounted(async() => {
   await axios
     .get(`http://localhost:3000/albums/${albumId.value}/photos`)
     .then((response) => {
-      photoData.value = response.data;
+      photosData.value = response.data;
     })
     .catch((error) => {
       console.log(error);
@@ -172,7 +201,7 @@ const reloadAlbum = async() => {
   await axios
     .get(`http://localhost:3000/albums/${albumId.value}/photos`)
     .then((response) => {
-      photoData.value = response.data;
+      photosData.value = response.data;
     })
     .catch((error) => {
       console.log(error);

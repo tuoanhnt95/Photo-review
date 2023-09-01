@@ -34,7 +34,7 @@
               </RouterLink>
               <font-awesome-icon icon="fa-solid fa-x"
                 class="absolute top-1 right-1 z-50 text-slate-400"
-                @click="deleteAlbum(album)"
+                @click="deleteAlbum(album.name, album.id)"
               />
             </div>
           </div>
@@ -93,14 +93,14 @@ const getCloudinaryImage = (publicId: String) => {
 
 const isCreatingAlbum = ref(false);
 
-const deleteAlbum = async(album: Album) => {
-  if (confirm(`Delete album "${album.name}"?`) === false) {
+const deleteAlbum = async(albumName: string, albumId: number) => {
+  if (confirm(`Delete album "${albumName}"?`) === false) {
     return;
   }
   await axios
-    .delete('http://localhost:3000/albums/' + album.id)
+    .delete('http://localhost:3000/albums/' + albumId)
     .then((response) => {
-      removeAlbum(album.id)
+      removeAlbum(albumId)
     }).catch((error) => {
       console.log(error);
     })
