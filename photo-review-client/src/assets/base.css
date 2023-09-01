@@ -89,6 +89,7 @@ body {
 
 .photo-container {
   aspect-ratio: 1 / 1;
+  object-fit: cover;
   border-width: 1px;
   border-color: rgb(71 85 105);
   cursor: pointer;
