@@ -45,6 +45,7 @@
     <AlbumCreate v-if="isCreatingAlbum"
       :albums="albums"
       @closeCreateAlbum="isCreatingAlbum = false"
+      @addedNewAlbum="(newAlbum) => addAlbum(newAlbum)"
       class="absolute top-[-200px] left-0 w-full z-10"
     >
     </AlbumCreate>
@@ -52,7 +53,7 @@
 </template>
 
 <script setup lang="ts">
-import { onBeforeMount, ref } from 'vue';
+import { computed, onBeforeMount, ref } from 'vue';
 import { RouterLink } from 'vue-router';
 import axios from 'axios';
 import { Cloudinary } from '@cloudinary/url-gen';
@@ -67,16 +68,18 @@ interface Album {
   cover: string
 }
 
-let albums = ref<Album[]>([]);
+let albumsData = ref<Album[]>([]);
 onBeforeMount(async () => {
   await axios
     .get('http://localhost:3000/albums')
     .then((response) => {
-      console.log('all albums', response.data)
-      albums.value = response.data.reverse();
+      albumsData.value = response.data.reverse();
     }).catch((error) => {
       console.log(error);
     })
+});
+const albums = computed(() => {
+  return albumsData.value;
 });
 
 const cld = new Cloudinary({
@@ -97,12 +100,19 @@ const deleteAlbum = async(album: Album) => {
   await axios
     .delete('http://localhost:3000/albums/' + album.id)
     .then((response) => {
-      console.log(response);
-      const index = albums.value.findIndex((alb: Album) => alb.id === album.id);
-      albums.value.splice(index, 1);
+      removeAlbum(album.id)
     }).catch((error) => {
       console.log(error);
     })
+}
+const removeAlbum = (albumId: number) => {
+  const index = albumsData.value.findIndex((alb: Album) => alb.id === albumId);
+  albumsData.value.splice(index, 1);
+}
+
+const addAlbum = (album: Album) => {
+  album.cover = '';
+  albumsData.value.unshift(album);
 }
 </script>
 
