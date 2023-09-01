@@ -94,9 +94,9 @@ const uploadPhoto = async() => {
           'Content-Type': 'multipart/form-data'
         }
       }
-    ).then(() => {
+    ).then((response) => {
       $emit('close-upload-photo');
-      $emit('uploaded-new-photo');
+      $emit('uploaded-new-photo', response.data);
       }
     ).catch((error) => {
       console.log(error);
