@@ -1,7 +1,5 @@
 import { createRouter, createWebHistory } from 'vue-router'
-// import HomeView from '../views/HomeView.vue'
 import Albums from '@/views/Albums.vue'
-// import Album from '@/views/Album.vue'
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -28,6 +26,11 @@ const router = createRouter({
       path: '/albums/:id',
       name: 'Album',
       component: () => import('../views/Album.vue')
+    },
+    {
+      path: '/photos/:id',
+      name: 'Photo',
+      component: () => import('../views/Photo.vue')
     }
   ]
 })
