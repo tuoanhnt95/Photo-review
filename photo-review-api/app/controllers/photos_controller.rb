@@ -18,11 +18,12 @@ class PhotosController < ApplicationController
   # POST /albums/:album_id/photos
   def create
     processed_images = ImageProcessor.call(photo_params)
-    processed_images.each do |img|
-      @photo = Photo.new({ album_id: photo_params[:album_id], image: img })
-      return false unless @photo.save
+    result = save_photos_to_db(processed_images)
+    if result.empty?
+      render(json: { error: 'Error uploading images' }, status: :unprocessable_entity)
+    else
+      render(json: result, status: :created)
     end
-    true
   end
 
   # PATCH/PUT /photos/:id
@@ -40,6 +41,15 @@ class PhotosController < ApplicationController
   end
 
   private
+
+  def save_photos_to_db(processed_images)
+    result = []
+    processed_images.each do |img_string|
+      photo = Photo.new({ album_id: photo_params[:album_id], image: img_string })
+      result.push(photo) if photo.save
+    end
+    result
+  end
 
   # Use callbacks to share common setup or constraints between actions.
   def set_photo
