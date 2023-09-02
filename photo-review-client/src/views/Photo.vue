@@ -5,17 +5,33 @@
         place-holder="predominant-color"
       />
     </div>
-    <h1>{{ }}</h1>
-    <div>
-      <div>
+    <div class="flex justify-center border border-1">
+      <!-- <div>
         <button>Delete</button>
         <button>Zoom in</button>
         <button>Zoom out</button>
-      </div>
-      <div>
-        <button>No</button>
-        <button>Maybe</button>
-        <button>Yes</button>
+        Move to next previous photo
+        Back to album
+      </div> -->
+      <div class="flex justify-center">
+        <div class="btn-review" :class="{ 'btn-selected': reviewComputed === 0 }">
+          <font-awesome-icon icon="fa-solid fa-xmark"
+            v-model="review"
+            @click="reviewPhoto(0)"
+          />
+        </div>
+        <div class="btn-review" :class="{ 'btn-selected': reviewComputed === 2 }">
+          <font-awesome-icon icon="fa-solid fa-question"
+            v-model="review"
+            @click="reviewPhoto(2)"
+          />
+        </div>
+        <div class="btn-review" :class="{ 'btn-selected': reviewComputed === 1 }">
+          <font-awesome-icon icon="fa-solid fa-check"
+            v-model="review"
+            @click="reviewPhoto(1)"
+          />
+        </div>
       </div>
     </div>
   </div>
@@ -32,6 +48,7 @@ const route = useRoute();
 
 interface Photo {
   id: number,
+  name: string,
   image: string,
   album_id: number,
   created_at: Date,
@@ -62,8 +79,42 @@ const cld = new Cloudinary({
 const getCloudinaryImage = (publicId: String) => {
   return cld.image(`photo_review/${publicId}`);
 }
+
+// Review
+const review = ref(null as number | null);
+const reviewComputed = computed(() => {
+  return review.value;
+});
+const reviewPhoto = (value: number) => {
+  console.log('review before click: ', review.value)
+  review.value = value;
+}
 </script>
 
-<style scoped></style>
+<style scoped>
+@import '../assets/main.css';
+
+/* Button */
+.btn-review {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin: 5px;
+  width: 5rem;
+  height: 5rem;
+  border-radius: 50%;
+  font-size: 40px;
+  background-color: transparent;
+  cursor: pointer;
+}
+.btn-review:hover {
+  background-color: rgb(203 213 225);
+  color: rgb(31 41 55);
+}
+
+.btn-selected {
+  background-color: rgb(71 85 105 / 50%);
+}
+</style>
 
 # Todo tomorrow: add file name to Photo model. we need it to display the file name in the Photo view.
