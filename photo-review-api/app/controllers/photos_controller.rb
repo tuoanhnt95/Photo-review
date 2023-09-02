@@ -44,9 +44,17 @@ class PhotosController < ApplicationController
 
   def save_photos_to_db(processed_images)
     result = []
-    processed_images.each do |img_string|
-      photo = Photo.new({ album_id: photo_params[:album_id], image: img_string })
-      result.push(photo) if photo.save
+    processed_images.each do |img|
+      photo = Photo.new({
+                          name: img[:img_name],
+                          image: img[:img_url],
+                          album_id: photo_params[:album_id]
+                        })
+      if photo.save
+        result.push(photo)
+      else
+        render json: photo.errors, status: :unprocessable_entity
+      end
     end
     result
   end
