@@ -1,19 +1,23 @@
 <template>
-  <div>
-    <div class="w-full h-[500px]">
+  <div class="relative container-no-nav-bar">
+    <div class="container-full-flex items-center">
       <AdvancedImage v-if="photo" :cldImg="getCloudinaryImage(photo.image)"
         place-holder="predominant-color"
+        class="object-contain"
       />
     </div>
-    <div class="flex justify-center border border-1">
-      <!-- <div>
-        <button>Delete</button>
-        <button>Zoom in</button>
-        <button>Zoom out</button>
-        Move to next previous photo
-        Back to album
-      </div> -->
-      <div class="flex justify-center">
+    <div class="container-layer container-full-flex items-center">
+      <div class="w-full flex justify-between">
+        <font-awesome-icon icon="fa-solid fa-caret-right" flip="horizontal"
+        class="btn-navigate-photo ml-6"
+        />
+        <font-awesome-icon icon="fa-solid fa-caret-right"
+        class="btn-navigate-photo mr-6"
+        />
+      </div>
+    </div>
+    <div class="container-layer container-full-flex items-end">
+      <div class="flex w-full justify-center">
         <div class="btn-review" :class="{ 'btn-selected': reviewComputed === 0 }">
           <font-awesome-icon icon="fa-solid fa-xmark"
             v-model="review"
@@ -34,6 +38,12 @@
         </div>
       </div>
     </div>
+    <!-- <div>
+        <button>Delete</button>
+        <button>Zoom in</button>
+        <button>Zoom out</button>
+        Back to album
+      </div> -->
   </div>
 </template>
 
@@ -94,6 +104,12 @@ const reviewPhoto = (value: number) => {
 <style scoped>
 @import '../assets/main.css';
 
+/* Navigation */
+.btn-navigate-photo {
+  font-size: 40px;
+  cursor: pointer;
+}
+
 /* Button */
 .btn-review {
   display: flex;
@@ -114,6 +130,21 @@ const reviewPhoto = (value: number) => {
 
 .btn-selected {
   background-color: rgb(71 85 105 / 50%);
+}
+
+/* Container */
+.container-layer {
+  position: absolute;
+  top: 0;
+  left: 0;
+  z-index: 10;
+}
+
+.container-full-flex {
+  display: flex;
+  justify-content: center;
+  width: 100%;
+  height: 100%;
 }
 </style>
 
