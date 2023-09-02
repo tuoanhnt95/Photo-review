@@ -61,14 +61,17 @@ puts "#{Album.count} albums created."
 puts 'Creating photo data...'
 Photo.create([
                {
+                 name: 'Nikon-D3500-Shotkit-2',
                  image: 't7rmnsrnhlqhjhlqpo6y',
                  album_id: Album.first.id
                },
                {
+                 name: 'Sony-a6000-Shotkit',
                  image: 'g6u80uqgthixbrpwmkxd',
                  album_id: Album.all[1].id
                },
                {
+                 name: 'Fuijifilm-XH1-Shotkit',
                  image: 'bfvvvdvmazvayfepwmr1',
                  album_id: Album.all[2].id
                }

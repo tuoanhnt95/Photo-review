@@ -5,12 +5,14 @@
         place-holder="predominant-color"
       />
     </div>
-    <h1>Photo name</h1>
+    <h1>{{ }}</h1>
     <div>
       <div>
         <button>Delete</button>
         <button>Zoom in</button>
         <button>Zoom out</button>
+      </div>
+      <div>
         <button>No</button>
         <button>Maybe</button>
         <button>Yes</button>
@@ -63,3 +65,5 @@ const getCloudinaryImage = (publicId: String) => {
 </script>
 
 <style scoped></style>
+
+# Todo tomorrow: add file name to Photo model. we need it to display the file name in the Photo view.

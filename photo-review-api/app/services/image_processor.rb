@@ -13,10 +13,11 @@ class ImageProcessor < ApplicationService
     processed_images = []
 
     @files.each do |file|
+      file_name_without_extension = file.original_filename.split('.')[0]
       cloudinary_image = process_image(file)
       url = cloudinary_image['secure_url']
       public_id = cloudinary_public_id(url)
-      processed_images.push(public_id)
+      processed_images.push({ img_name: file_name_without_extension, img_url: public_id })
     end
     processed_images
   end
