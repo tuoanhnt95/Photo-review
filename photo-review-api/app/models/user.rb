@@ -5,4 +5,5 @@ class User < ApplicationRecord
          :recoverable, :rememberable, :validatable
 
   has_many :albums, dependent: :destroy
+  has_many :photo_user_reviews, dependent: :destroy
 end

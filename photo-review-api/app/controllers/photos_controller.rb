@@ -1,5 +1,5 @@
 class PhotosController < ApplicationController
-  before_action :set_photo, only: %i[ show update destroy ]
+  before_action :set_photo, only: %i[show update destroy]
   skip_before_action :verify_authenticity_token
   skip_before_action :authenticate_user!
 

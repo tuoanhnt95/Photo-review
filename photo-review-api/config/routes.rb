@@ -1,12 +1,13 @@
 Rails.application.routes.draw do
-  resources :photo_user_reviews
   resources :reviews
   resources :albums do
     resources :photos, only: %i[index create]
   end
-  resources :photos, only: %i[show update destroy]
+  resources :photos, only: %i[show update destroy] do
+    resources :photo_user_reviews, only: %i[index create]
+  end
+  get '/photos/:photo_id/get_review', to: 'photo_user_reviews#show_by_photo_and_use', as: 'reviews_by_photo_and_user'
   devise_for :users
-  # Define your application routes per the DSL in https://guides.rubyonrails.org/routing.html
-
-  # Defines the root path route ("/")
 end
+
+# TODO: Add a route to get all reviews for a photo
