@@ -6,7 +6,10 @@ Rails.application.routes.draw do
   resources :photos, only: %i[show update destroy] do
     resources :photo_user_reviews, only: %i[index create]
   end
-  get '/photos/:photo_id/get_review', to: 'photo_user_reviews#show_by_photo_and_use', as: 'reviews_by_photo_and_user'
+  resources :photo_user_reviews, only: %i[show destroy]
+  get '/photos/:photo_id/get_review', to: 'photo_user_reviews#show_by_photo_and_user', as: 'reviews_by_photo_and_user'
+  put '/photos/:photo_id/photo_user_reviews', to: 'photo_user_reviews#update', as: 'update_review'
+
   devise_for :users
 end
 
