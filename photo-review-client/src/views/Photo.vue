@@ -118,8 +118,8 @@ onBeforeMount(async() => {
   await axios
     .get(`http://localhost:3000/photos/${photoId.value}/get_review`)
     .then((response) => {
-      if (response.data !== -1) {
-        review.value = response.data;
+      if (response.data && parseInt(response.data) !== -1) {
+        review.value = parseInt(response.data);
       }
     })
     .catch((error) => {
