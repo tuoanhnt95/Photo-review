@@ -21,9 +21,9 @@ Review.destroy_all
 puts 'Creating new data...'
 puts 'Creating review data...'
 Review.create([
-                { name: 'No' },
-                { name: 'Maybe' },
-                { name: 'Yes' }
+                { name: 'No', value: 0 },
+                { name: 'Maybe', value: 2 },
+                { name: 'Yes', value: 1 }
               ])
 puts 'Creating user data...'
 User.create([

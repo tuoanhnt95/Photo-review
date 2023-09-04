@@ -1,5 +1,5 @@
 class PhotosController < ApplicationController
-  before_action :set_photo, only: %i[ show update destroy ]
+  before_action :set_photo, only: %i[show update destroy]
   skip_before_action :verify_authenticity_token
   skip_before_action :authenticate_user!
 
@@ -45,11 +45,7 @@ class PhotosController < ApplicationController
   def save_photos_to_db(processed_images)
     result = []
     processed_images.each do |img|
-      photo = Photo.new({
-                          name: img[:img_name],
-                          image: img[:img_url],
-                          album_id: photo_params[:album_id]
-                        })
+      photo = make_new_photo(img)
       if photo.save
         result.push(photo)
       else
@@ -57,6 +53,14 @@ class PhotosController < ApplicationController
       end
     end
     result
+  end
+
+  def make_new_photo(img)
+    Photo.new({
+                name: img[:img_name],
+                image: img[:img_url],
+                album_id: photo_params[:album_id]
+              })
   end
 
   # Use callbacks to share common setup or constraints between actions.

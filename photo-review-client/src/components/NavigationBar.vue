@@ -31,7 +31,7 @@ import { RouterLink } from 'vue-router'
 
 .container-navigation {
   width: 100%;
-  height: 4rem;
+  height: var(--height-nav-bar);
   background-color: white;
   border-top: 1px solid #e5e7eb;
 }

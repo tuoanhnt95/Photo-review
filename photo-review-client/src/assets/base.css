@@ -42,6 +42,12 @@
   --color-primary-dark: var(--violet-800);
 }
 
+/* measurement variables */
+:root {
+  --height-nav-bar: 4rem;
+  --height-no-nav-bar: calc(100vh - var(--height-nav-bar));
+}
+
 @media (prefers-color-scheme: dark) {
   :root {
     --color-background: var(--slate-800);
@@ -93,4 +99,8 @@ body {
   border-width: 1px;
   border-color: rgb(71 85 105);
   cursor: pointer;
+}
+
+.container-no-nav-bar {
+  height: var(--height-no-nav-bar);
 }

@@ -3,7 +3,7 @@ class CreatePhotoUserReviews < ActiveRecord::Migration[7.0]
     create_table :photo_user_reviews do |t|
       t.references :photo, null: false, foreign_key: true
       t.references :user, null: false, foreign_key: true
-      t.references :review, null: false, foreign_key: true
+      t.references :review, foreign_key: true
 
       t.timestamps
     end
