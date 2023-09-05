@@ -42,18 +42,13 @@ class PhotoUserReviewsController < ApplicationController
         user_id: user.id,
         review_id: review_id
       )
-      p 'new photo review created'
-      p photo_user_review
       render json: photo_user_review
       return
     end
-    p 'photo review found'
-    p 'no change' if photo_user_review.review_id == review_id
     # check if review_id has changed before update
     return if photo_user_review.review_id == review_id
 
     if photo_user_review.update(review_id: review_id)
-      p 'photo review updated'
       render json: photo_user_review
     else
       render json: photo_user_review.errors, status: :unprocessable_entity
