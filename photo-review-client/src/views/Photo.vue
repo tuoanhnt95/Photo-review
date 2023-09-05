@@ -1,7 +1,6 @@
 <template>
   <div class="relative container-no-nav-bar">
-    <!-- <div class="container-full-flex items-center"> -->
-    <div class="container-full-flex items-center">
+    <div class="container-full-flex items-start">
       <AdvancedImage v-if="photo" :cldImg="getCloudinaryImage(photo.image)"
         place-holder="predominant-color"
         class="object-contain"
@@ -10,6 +9,18 @@
     </div>
 
     <div class="container-layer w-full h-full grid grid-rows-3">
+      <div class="row-start-1">
+        <div class="ml-5 mt-5 p-2 w-8 cursor-pointer">
+          <RouterLink :to="{ name: 'Album', params: { id: photo?.album_id } }"
+            class="text-slate-400"
+          >
+            <font-awesome-icon icon="fa-solid fa-arrow-left"
+              class="text-xl opacity-30 hover:opacity-100"
+            />
+          </RouterLink>
+        </div>
+      </div>
+
       <div class="row-start-2 self-center w-full flex justify-between">
         <font-awesome-icon icon="fa-solid fa-caret-right" flip="horizontal"
           class="btn-navigate-photo ml-6 cursor-pointer"
@@ -42,26 +53,10 @@
         </div>
       </div>
     </div>
-    <!-- <div class="container-layer container-full-flex items-center">
-      <div class="w-full flex justify-between">
-        <font-awesome-icon icon="fa-solid fa-caret-right" flip="horizontal"
-          class="btn-navigate-photo ml-6 cursor-pointer"
-          @click="navigatePhoto(-1)"
-        />
-        <font-awesome-icon icon="fa-solid fa-caret-right"
-          class="btn-navigate-photo mr-6 cursor-pointer"
-          @click="navigatePhoto(1)"
-        />
-      </div>
-    </div>
-    <div class="container-layer container-full-flex items-end">
-
-    </div> -->
     <!-- <div>
         <button>Delete</button>
         <button>Zoom in</button>
         <button>Zoom out</button>
-        Back to album
       </div> -->
   </div>
 </template>
@@ -71,6 +66,7 @@ import { onBeforeMount, ref, computed } from 'vue';
 import { useRoute } from 'vue-router';
 import axios from 'axios';
 import { Cloudinary } from '@cloudinary/url-gen';
+import { byAngle } from '@cloudinary/url-gen/actions/rotate';
 import { AdvancedImage } from '@cloudinary/vue';
 
 const route = useRoute();
@@ -106,7 +102,7 @@ const cld = new Cloudinary({
   }
 });
 const getCloudinaryImage = (publicId: String) => {
-  return cld.image(`photo_review/${publicId}`);
+  return cld.image(`photo_review/${publicId}`).rotate(byAngle(-90));
 }
 
 // Review
@@ -114,6 +110,7 @@ const review = ref(-1);
 const reviewComputed = computed(() => {
   return review.value;
 });
+
 onBeforeMount(async() => {
   await axios
     .get(`http://localhost:3000/photos/${photoId.value}/get_review`)
@@ -126,24 +123,16 @@ onBeforeMount(async() => {
       console.log(error);
     });
 });
-const reviewPhoto = (value: number) => {
+
+function reviewPhoto (value: number) {
   console.log('review before click: ', review.value)
   if (value !== -1) {
     review.value = value;
   }
   console.log('review after click: ', review.value)
 }
-const navigatePhoto = (value: number) => {
-  // save review if review change
-  console.log('review before navigate: ', review.value)
-  saveReview();
-  // move back or forth photo
-  // console.log('navigate before click: ', photoId.value)
-  // photoId.value += value;
-  // console.log('navigate after click: ', photoId.value)
-}
 
-const saveReview = () => {
+function saveReview () {
   if (review.value !== -1) {
     axios
       .put(`http://localhost:3000/photos/${photoId.value}/photo_user_reviews`, {
@@ -156,6 +145,17 @@ const saveReview = () => {
         console.log(error);
       });
   }
+}
+
+// navigate
+function navigatePhoto (value: number) {
+  // save review if review change
+  console.log('review before navigate: ', review.value)
+  saveReview();
+  // move back or forth photo
+  // console.log('navigate before click: ', photoId.value)
+  // photoId.value += value;
+  // console.log('navigate after click: ', photoId.value)
 }
 </script>
 
