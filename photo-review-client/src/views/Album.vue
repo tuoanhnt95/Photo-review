@@ -45,7 +45,8 @@
         <RouterLink :to="{ name: 'Photo', params: { id: photo.id } }"
           class="photo-container flex justify-center"
         >
-          <AdvancedImage :cldImg="getCloudinaryImage(photo.image)" class="object-cover"/>
+          <AdvancedImage :cldImg="getCloudinaryImage(photo.image)"
+            class="object-cover" :class="getPhotoClass(photo)" :id="photo.image"/>
         </RouterLink>
         <font-awesome-icon icon="fa-solid fa-x"
           class="absolute top-1 right-1 z-50 text-slate-400"
@@ -87,6 +88,7 @@ interface Photo {
   id: number,
   image: string,
   album_id: number,
+  review_result: number | null,
   created_at: Date,
   updated_at: Date
 }
@@ -196,6 +198,31 @@ onBeforeMount(async() => {
       console.log(error);
     });
 });
+
+// filter
+const filterReview = ref(null || -1);
+const filterReviewTypes = [
+  { id: -1, name: 'Off' }
+  , { id: 0, name: 'No' }
+  , { id: 1, name: 'Yes' }
+  , { id: 2, name: 'Maybe' }
+]
+
+// style
+function getPhotoClass(photo: Photo) {
+  // TODO: add filter to show review result
+  const element = document.getElementById(photo.image) as HTMLElement;
+  let elementClass = element?.className;
+  // if filter is Off, show all photos normal
+  if (filterReview.value === -1 || !elementClass) {
+    return;
+  }
+
+  // if filter chosen, show non-chosen photos with opacity-10 saturate-0
+  if (filterReview.value !== photo.review_result) {
+    elementClass += ' opacity-10 saturate-0'
+  }
+}
 </script>
 
 <style scoped>
