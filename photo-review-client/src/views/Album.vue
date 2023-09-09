@@ -23,8 +23,8 @@
         />
       </div>
     </div>
-
-    <div class="flex justify-between ml-3 mr-8">
+<!-- Filter -->
+    <div class="flex justify-between w-full ml-3 mr-8">
       <div class="flex">
         <font-awesome-icon icon="fa-solid fa-calendar-days" class="mr-2 self-center"/>
         <div v-if="!isEditing" class="text-slate-400">
@@ -34,25 +34,41 @@
           <input type="date" class="text-black" v-model="albumExpiryDate">
         </div>
       </div>
-      <div>Filter</div>
+      <div class="flex border w-42 bg-slate-200 text-slate-600 rounded-sm">
+        <div
+          v-for="opt in filterReview"
+          :key="opt.icon"
+          class="btn-filter w-14 px-2 py-0.5"
+          :class="{ 'btn-filter-selected': opt.selected }"
+          @click="opt.selected = !opt.selected"
+        >
+          <div>
+            <font-awesome-icon :icon="`fa-solid fa-${opt.icon}`" />
+          </div>
+          <div>({{ numberOfPhotosWithReview(opt.value) }})</div>
+        </div>
+      </div>
     </div>
 
+<!-- Photos -->
     <div class="grid grid-cols-5 gap-0.5 w-full mt-4">
       <div @click="isUploadingPhoto = true" class="photo-container flex">
         <font-awesome-icon icon="fa-solid fa-plus" class="m-auto text-violet-600"/>
       </div>
-      <div v-for="(photo, i) in photos" :key="i" class="relative">
+      <div v-for="(photo, i) in photos" :key="i" class="relative cursor-pointer">
         <RouterLink :to="{ name: 'Photo', params: { id: photo.id } }"
           class="photo-container flex justify-center"
         >
-          <AdvancedImage :cldImg="getCloudinaryImage(photo.image)" class="object-cover"/>
+          <AdvancedImage :cldImg="getCloudinaryImage(photo.image)"
+            :id="photo.image" class="object-cover"
+            :class="getPhotoClass(photo)"
+          />
         </RouterLink>
         <font-awesome-icon icon="fa-solid fa-x"
           class="absolute top-1 right-1 z-50 text-slate-400"
           @click="deletePhoto(photo.id)"
         />
       </div>
-
     </div>
 
     <PhotoUpload v-if="isUploadingPhoto"
@@ -87,6 +103,7 @@ interface Photo {
   id: number,
   image: string,
   album_id: number,
+  review_results: number | null,
   created_at: Date,
   updated_at: Date
 }
@@ -196,8 +213,54 @@ onBeforeMount(async() => {
       console.log(error);
     });
 });
+
+// filter
+const filterMode = ref(1); // 1: blur, 2: hide
+const filterModes = [
+  { value: 1, name: 'blur' },
+  { value: 2, name: 'hide' },
+];
+const filterReview = ref([
+  { selected: false, value: 1, icon: 'check' },
+  { selected: false, value: 2, icon: 'question' },
+  { selected: false, value: 0, icon: 'xmark' },
+  { selected: false, value: null, icon: 'exclamation' }
+]); // Yes Maybe No
+const filterIsSelected = computed(() => {
+  return filterReview.value.some((x) => x.selected);
+});
+
+function numberOfPhotosWithReview(val: number | null) {
+  return photosData.value.filter((x) => x.review_results === val).length;
+}
+
+// style
+function getPhotoClass(photo: Photo) {
+  let result = '';
+  const filterOfPhoto = filterReview.value.find((x) => x.value === photo.review_results);
+  if (!filterIsSelected.value) {
+    return result;
+  } else if (!filterOfPhoto || !filterOfPhoto.selected) {
+    result += ' opacity-10 saturate-0'
+  }
+  return result
+}
 </script>
 
 <style scoped>
 @import '../assets/main.css';
+
+.btn-filter {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border-radius: 0.25rem;
+  border-width: 1px;
+  cursor: pointer;
+}
+
+.btn-filter-selected {
+  background-color: white;
+  color: var(--color-primary);
+}
 </style>

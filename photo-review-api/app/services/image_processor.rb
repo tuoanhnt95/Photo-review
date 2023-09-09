@@ -29,7 +29,6 @@ class ImageProcessor < ApplicationService
     file_name = file.original_filename
     resized_width, resized_height = get_image_resized(@upload_option)
     use_magicload = image_uses_magicload(file.original_filename)
-
     if use_magicload
       process_magicload(file_path, resized_width, resized_height)
     else
@@ -48,8 +47,7 @@ class ImageProcessor < ApplicationService
 
     resized_image = Vips::Image.thumbnail image.filename, resized_width, height: resized_height
     jpg_converted_file_name = image_name(file_name)
-
-    resized_image.write_to_file jpg_converted_file_name unless image_is_jpg(file_name)
+    resized_image.write_to_file jpg_converted_file_name
     result = upload_image_to_cloudinary(jpg_converted_file_name)
 
     File.delete(jpg_converted_file_name)
@@ -58,6 +56,8 @@ class ImageProcessor < ApplicationService
   end
 
   def upload_image_to_cloudinary(image_path)
+    p 'uploading to cloudinary'
+    p image_path
     Cloudinary::Uploader.unsigned_upload(image_path, 'photo_review')
   end
 
