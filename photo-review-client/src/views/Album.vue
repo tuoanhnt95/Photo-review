@@ -1,5 +1,5 @@
 <template>
-  <div>
+  <div class="w-full">
     <div class="flex justify-between mx-8 mt-4">
       <div v-if="!isEditing" class="label-text">
         {{ album.name }}
@@ -24,7 +24,7 @@
       </div>
     </div>
 <!-- Filter -->
-    <div class="flex justify-between w-full ml-3 mr-8">
+    <div class="flex justify-between ml-3">
       <div class="flex">
         <font-awesome-icon icon="fa-solid fa-calendar-days" class="mr-2 self-center"/>
         <div v-if="!isEditing" class="text-slate-400">
@@ -34,18 +34,17 @@
           <input type="date" class="text-black" v-model="albumExpiryDate">
         </div>
       </div>
-      <div class="flex border w-42 bg-slate-200 text-slate-600 rounded-sm">
-        <div
-          v-for="opt in filterReview"
-          :key="opt.icon"
-          class="btn-filter w-14 px-2 py-0.5"
-          :class="{ 'btn-filter-selected': opt.selected }"
-          @click="opt.selected = !opt.selected"
-        >
-          <div>
-            <font-awesome-icon :icon="`fa-solid fa-${opt.icon}`" />
+      <div class="flex w-42 bg-slate-200 border divide-x divide-y-0 divide-slate-400 text-slate-600 rounded-sm">
+        <div v-for="opt in filterReview" :key="opt.icon">
+          <div class="btn-filter w-14 px-2 py-0.5"
+            :class="{ 'btn-filter-selected': opt.selected }"
+            @click="opt.selected = !opt.selected"
+          >
+            <div>
+              <font-awesome-icon :icon="`fa-solid fa-${opt.icon}`" />
+            </div>
+            <div>({{ numberOfPhotosWithReview(opt.value) }})</div>
           </div>
-          <div>({{ numberOfPhotosWithReview(opt.value) }})</div>
         </div>
       </div>
     </div>
@@ -252,7 +251,7 @@ function getPhotoClass(photo: Photo) {
 
 .btn-filter {
   display: flex;
-  justify-content: space-between;
+  justify-content: space-around;
   align-items: center;
   border-radius: 0.25rem;
   border-width: 1px;
