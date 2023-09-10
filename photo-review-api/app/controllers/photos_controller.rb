@@ -43,7 +43,10 @@ class PhotosController < ApplicationController
 
   # DELETE /photos/:id
   def destroy
+    public_id = @photo.image
     @photo.destroy
+    folder = 'photo_review/'
+    Cloudinary::Uploader.destroy(folder + public_id)
   end
 
   private
