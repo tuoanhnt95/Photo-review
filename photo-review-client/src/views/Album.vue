@@ -1,93 +1,105 @@
 <template>
-  <div class="w-full">
-    <div class="flex justify-between mx-8 mt-4">
-      <div v-if="!isEditing" class="label-text">
-        {{ album.name }}
-      </div>
-      <div v-else class="label-text">
-        <input type="text" v-model="albumName" class="pl-2 rounded text-black" >
-      </div>
+  <div class="absolute top-0 left-0 w-100 h-100">
+    <div class="relative w-full">
+      <div class="flex justify-between mx-8 mt-4">
+        <div v-if="!isEditing" class="label-text">
+          {{ album.name }}
+        </div>
+        <div v-else class="label-text">
+          <input type="text" v-model="albumName" class="pl-2 rounded text-black" >
+        </div>
 
-      <div v-if="!isEditing" class="flex">
-        <font-awesome-icon icon="fa-solid fa-pen"
-          class="self-center text-slate-400"
-          @click="startEditingAlbum"
-        />
-      </div>
-      <div v-else class="flex space-x-6 self-center">
-        <font-awesome-icon icon="fa-solid fa-floppy-disk"
-          @click="saveEditAlbum()"
-        />
-        <font-awesome-icon icon="fa-solid fa-x"
-          @click="cancelEditAlbum()"
-        />
-      </div>
-    </div>
-<!-- Filter -->
-    <div class="flex justify-between ml-3">
-      <div class="flex">
-        <font-awesome-icon icon="fa-solid fa-calendar-days" class="mr-2 self-center"/>
-        <div v-if="!isEditing" class="text-slate-400">
-          {{ formatDate(album.expiry_date) }}
+        <div v-if="!isEditing" class="flex">
+          <font-awesome-icon icon="fa-solid fa-pen"
+            class="self-center text-slate-400"
+            @click="startEditingAlbum"
+          />
         </div>
-        <div v-else>
-          <input type="date" class="text-black" v-model="albumExpiryDate">
+        <div v-else class="flex space-x-6 self-center">
+          <font-awesome-icon icon="fa-solid fa-floppy-disk"
+            @click="saveEditAlbum()"
+          />
+          <font-awesome-icon icon="fa-solid fa-x"
+            @click="cancelEditAlbum()"
+          />
         </div>
       </div>
-      <div class="flex w-42 bg-slate-200 border divide-x divide-y-0 divide-slate-400 text-slate-600 rounded-sm">
-        <div v-for="opt in filterReview" :key="opt.icon">
-          <div class="btn-filter w-14 px-2 py-0.5"
-            :class="{ 'btn-filter-selected': opt.selected }"
-            @click="opt.selected = !opt.selected"
-          >
-            <div>
-              <font-awesome-icon :icon="`fa-solid fa-${opt.icon}`" />
+  <!-- Filter -->
+      <div class="flex justify-between ml-3">
+        <div class="flex">
+          <font-awesome-icon icon="fa-solid fa-calendar-days" class="mr-2 self-center"/>
+          <div v-if="!isEditing" class="text-slate-400">
+            {{ formatDate(album.expiry_date) }}
+          </div>
+          <div v-else>
+            <input type="date" class="text-black" v-model="albumExpiryDate">
+          </div>
+        </div>
+        <div class="flex w-42 bg-slate-200 border divide-x divide-y-0 divide-slate-400 text-slate-600 rounded-sm">
+          <div v-for="opt in filterReview" :key="opt.icon">
+            <div class="btn-filter w-14 px-2 py-0.5"
+              :class="{ 'btn-filter-selected': opt.selected }"
+              @click="opt.selected = !opt.selected"
+            >
+              <div>
+                <font-awesome-icon :icon="`fa-solid fa-${opt.icon}`" />
+              </div>
+              <div>({{ numberOfPhotosWithReview(opt.value) }})</div>
             </div>
-            <div>({{ numberOfPhotosWithReview(opt.value) }})</div>
           </div>
         </div>
       </div>
-    </div>
 
-<!-- Photos -->
-    <div class="grid grid-cols-5 gap-0.5 w-full mt-4">
-      <div @click="isUploadingPhoto = true" class="photo-container flex">
-        <font-awesome-icon icon="fa-solid fa-plus" class="m-auto text-violet-600"/>
-      </div>
-      <div v-for="(photo, i) in photos" :key="i" class="relative cursor-pointer">
-        <RouterLink :to="{ name: 'Photo', params: { id: photo.id } }"
-          class="photo-container flex justify-center"
-        >
-          <AdvancedImage :cldImg="getCloudinaryImage(photo.image)"
-            :id="photo.image" class="object-cover"
-            :class="getPhotoClass(photo)"
+  <!-- Photos -->
+      <div class="grid grid-cols-5 gap-0.5 w-full mt-4">
+        <div @click="isUploadingPhoto = true" class="photo-container flex">
+          <font-awesome-icon icon="fa-solid fa-plus" class="m-auto text-violet-600"/>
+        </div>
+        <div v-for="(photo, i) in photos" :key="i" class="relative cursor-pointer">
+          <!-- <RouterLink :to="{ name: 'Photo', params: { id: photo.id } }"
+            class="photo-container flex justify-center"
+          > -->
+          <div class="photo-container flex justify-center cursor-pointer" @click="showPhoto(photo.id)">
+            <AdvancedImage :cldImg="getCloudinaryImage(photo.image)"
+              :id="photo.image" class="object-cover"
+              :class="getPhotoClass(photo)"
+            />
+          </div>
+          <!-- </RouterLink> -->
+          <font-awesome-icon icon="fa-solid fa-x"
+            class="absolute top-1 right-1 z-50 text-slate-400"
+            @click="deletePhoto(photo.id)"
           />
-        </RouterLink>
-        <font-awesome-icon icon="fa-solid fa-x"
-          class="absolute top-1 right-1 z-50 text-slate-400"
-          @click="deletePhoto(photo.id)"
-        />
+        </div>
       </div>
-    </div>
 
-    <PhotoUpload v-if="isUploadingPhoto"
-      :albumId="album.id"
-      class="absolute w-full z-10"
-      @uploaded-new-photo="(photos) => addPhoto(photos)"
-      @close-upload-photo="isUploadingPhoto = false"
-    >
-    </PhotoUpload>
+      <PhotoUpload v-if="isUploadingPhoto"
+        :albumId="album.id"
+        class="absolute w-full z-10"
+        @uploaded-new-photo="(photos) => addPhoto(photos)"
+        @close-upload-photo="isUploadingPhoto = false"
+      />
+    </div>
+    <Photo v-if="isShowingPhoto"
+      :photo="photoShowing"
+      :photos="photos"
+      class="absolute border top-0 left-0 w-full z-50"
+      @reviewed-photo="(photo: Photo) => updatePhoto(photo)"
+      @navigate-photo="(photoId: Number) => showPhoto(photoId)"
+      @close-review-photo="closeReviewPhoto"
+    />
   </div>
 </template>
 
 <script setup lang="ts">
 import { computed, onBeforeMount, ref } from 'vue';
-import { RouterLink } from 'vue-router';
+// import { RouterLink } from 'vue-router';
 import { useRoute } from 'vue-router';
 import axios from 'axios';
 import { Cloudinary } from '@cloudinary/url-gen';
 import { AdvancedImage } from '@cloudinary/vue';
-
+// components
+import Photo from '../components/Photo.vue';
 import PhotoUpload from '../components/PhotoUpload.vue';
 
 const route = useRoute();
@@ -231,6 +243,22 @@ const filterIsSelected = computed(() => {
 
 function numberOfPhotosWithReview(val: number | null) {
   return photosData.value.filter((x) => x.review_results === val).length;
+}
+
+// photo review
+const isShowingPhoto = ref(false);
+const photoShowing = ref<Photo | null>();
+const showPhoto = (photoId: Number) => {
+  photoShowing.value = photosData.value.find((x) => x.id === photoId);
+  isShowingPhoto.value = true;
+}
+const updatePhoto = (photo: Photo) => {
+  const index = photosData.value.findIndex((x) => x.id === photo.id);
+  photosData.value[index] = photo;
+}
+function closeReviewPhoto() {
+  isShowingPhoto.value = false;
+  photoShowing.value = null;
 }
 
 // style

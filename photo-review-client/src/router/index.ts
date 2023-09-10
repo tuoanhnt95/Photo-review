@@ -26,12 +26,12 @@ const router = createRouter({
       path: '/albums/:id',
       name: 'Album',
       component: () => import('../views/Album.vue')
-    },
-    {
-      path: '/photos/:id',
-      name: 'Photo',
-      component: () => import('../views/Photo.vue')
     }
+    // ,{
+    //   path: '/photos/:id',
+    //   name: 'Photo',
+    //   component: () => import('../views/Photo.vue')
+    // }
   ]
 })
 

@@ -1,5 +1,5 @@
 <template>
-  <RouterView class="container-no-nav-bar"></RouterView>
+  <RouterView></RouterView>
   <NavigationBar class="fixed bottom-0 left-0 z-50"></NavigationBar>
 </template>
 
@@ -7,6 +7,6 @@
 import NavigationBar from './components/NavigationBar.vue'
 </script>
 
-<style scoped>
+<style>
 @import './assets/main.css';
 </style>
