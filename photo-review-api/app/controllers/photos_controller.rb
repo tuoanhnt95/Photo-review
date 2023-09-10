@@ -58,10 +58,6 @@ class PhotosController < ApplicationController
     # Only show result after current user has reviewed
     return nil if reviews.empty? || review_by_user.nil?
 
-    # 0: No, 1: Yes, 2: Maybe
-    # If all reviews are No, then No
-    # If all reviews are Yes, then Yes
-    # Otherwise, then Maybe
     values = map_review_value(reviews)
     if reviews_all_yes?(values)
       1

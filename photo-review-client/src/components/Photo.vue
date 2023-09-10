@@ -13,48 +13,30 @@
       <div class="container-layer w-full h-full grid grid-rows-3">
         <!-- Back to Album -->
         <div class="row-start-1 flex justify-between">
-          <div class="ml-5 mt-5 p-2 w-8 h-fit cursor-pointer text-slate-400" @click="backToAlbum">
-            <font-awesome-icon icon="fa-solid fa-arrow-left"
-              class="text-xl opacity-30 hover:opacity-100"
-            />
+          <div class="ml-5 btn-small" @click="backToAlbum">
+            <font-awesome-icon icon="fa-solid fa-arrow-left" class="btn-small-icon"/>
           </div>
-          <div class="mr-5 mt-5 p-2 w-8 h-fit cursor-pointer text-slate-400" @click="rotatePhoto">
-            <font-awesome-icon icon="fa-solid fa-rotate-left"
-              class="text-xl opacity-30 hover:opacity-100"
-            />
+          <div class="mr-5 btn-small" @click="rotatePhoto">
+            <font-awesome-icon icon="fa-solid fa-rotate-left" class="btn-small-icon"/>
           </div>
         </div>
 
         <!-- Navigate -->
         <div class="row-start-2 self-center w-full flex justify-between">
-          <font-awesome-icon icon="fa-solid fa-caret-right" flip="horizontal"
-            class="btn-navigate-photo ml-6 cursor-pointer"
-            @click="navigatePhoto(-1)"
-          />
-          <font-awesome-icon icon="fa-solid fa-caret-right"
-            class="btn-navigate-photo mr-6 cursor-pointer"
-            @click="navigatePhoto(1)"
+          <font-awesome-icon v-for="opt in navigateDisplayOptions" :key="opt.icon" :icon="`fa-solid fa-caret-${opt.icon}`"
+            :class="`btn-navigate-photo ${opt.class}`"
+            @click="navigatePhoto(opt.value)"
           />
         </div>
 
         <!-- Review -->
         <div class="row-start-3 self-end flex w-full justify-center">
-          <div class="btn-review" :class="{ 'btn-selected': reviewComputed === 0 }">
-            <font-awesome-icon icon="fa-solid fa-xmark"
+          <div v-for="opt in reviewDisplayOptions" :key="opt.value"
+            class="btn-review" :class="{ 'btn-selected': reviewComputed === opt.value }"
+          >
+            <font-awesome-icon :icon="`fa-solid fa-${opt.icon}`"
               v-model="photo.review_results"
-              @click="reviewPhoto(0)"
-            />
-          </div>
-          <div class="btn-review" :class="{ 'btn-selected': reviewComputed === 2 }">
-            <font-awesome-icon icon="fa-solid fa-question"
-              v-model="photo.review_results"
-              @click="reviewPhoto(2)"
-            />
-          </div>
-          <div class="btn-review" :class="{ 'btn-selected': reviewComputed === 1 }">
-            <font-awesome-icon icon="fa-solid fa-check"
-              v-model="photo.review_results"
-              @click="reviewPhoto(1)"
+              @click="reviewPhoto(opt.value)"
             />
           </div>
         </div>
@@ -70,13 +52,11 @@
 
 <script setup lang="ts">
 import { ref, computed, type PropType } from 'vue';
-// import { useRoute } from 'vue-router';
 import axios from 'axios';
 import { Cloudinary } from '@cloudinary/url-gen';
 import { byAngle } from '@cloudinary/url-gen/actions/rotate';
 import { AdvancedImage } from '@cloudinary/vue';
 
-// const route = useRoute();
 const emit = defineEmits(['reviewed-photo', 'close-review-photo', 'navigate-photo']);
 
 interface Photo {
@@ -90,39 +70,17 @@ interface Photo {
   updated_at: Date
 }
 
-// const photoId = computed(() => {
-//   const id = route.params.id;
-//   return typeof id === 'string' ? parseInt(id) : parseInt(id[0]);
-// });
-
-// onBeforeMount(async() => {
-//   await axios
-//     .get(`http://localhost:3000/photos/${photoId.value}`)
-//     .then((response) => {
-//       photo.value = response.data;
-//     })
-//     .catch((error) => {
-//       console.log(error);
-//     });
-// });
-
 const props = defineProps({
   photo: {
     type: Object as PropType<Photo>,
     required: true
   },
-  // photoId: {
-  //   type: Number,
-  //   required: true
-  // },
-
   photos: {
     type: Array as PropType<Photo[]>,
     required: true
   }
 });
 const photo = ref(props.photo);
-// const photo = ref(props.photos.find((pho: Photo) => pho.id === props.photoId));
 const photos = ref(props.photos);
 
 const cld = new Cloudinary({
@@ -132,26 +90,12 @@ const cld = new Cloudinary({
 });
 const getCloudinaryImage = (publicId: String, angle: number) => {
   return cld.image(`photo_review/${publicId}`).rotate(byAngle(angle));
-  // return cld.image(`photo_review/${publicId}`);
 }
 
 // Review
 const reviewComputed = computed(() => {
   return photo.value.review_results;
 });
-
-// onBeforeMount(async() => {
-//   await axios
-//     .get(`http://localhost:3000/photos/${photoId.value}/get_review`)
-//     .then((response) => {
-//       if (response.data && parseInt(response.data) !== -1) {
-//         review.value = parseInt(response.data);
-//       }
-//     })
-//     .catch((error) => {
-//       console.log(error);
-//     });
-// });
 
 function reviewPhoto (value: number) {
   if (value !== -1) {
@@ -201,6 +145,18 @@ function backToAlbum () {
 function rotatePhoto () {
   photo.value.angle = photo.value.angle - 90;
 }
+
+// display v-for
+const navigateDisplayOptions = [
+  { value: -1, icon: 'left', class: 'ml-6' },
+  { value: 1, icon: 'right', class: 'mr-6' }
+];
+
+const reviewDisplayOptions = [
+  { value: 0, icon: 'xmark' },
+  { value: 2, icon: 'question' },
+  { value: 1, icon: 'check' }
+];
 </script>
 
 <style scoped>
@@ -232,6 +188,25 @@ function rotatePhoto () {
 
 .btn-selected {
   background-color: rgb(71 85 105 / 50%);
+}
+
+.btn-small {
+  margin-top: 1.25rem;
+  padding: 0.5rem;
+  width: fit-content;
+  height: fit-content;
+  color: rgb(148 163 184);
+  cursor: pointer;
+}
+
+.btn-small-icon {
+  font-size: 1.125rem;
+  line-height: 1.75rem;
+  opacity: 0.3;
+}
+
+.btn-small-icon:hover {
+  opacity: 1;
 }
 
 /* Container */
