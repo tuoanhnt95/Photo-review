@@ -1,5 +1,5 @@
 <template>
-  <div class="absolute top-0 left-0 w-100 h-100">
+  <div class="absolute top-0 left-0 w-full h-full">
     <div class="relative w-full">
       <div class="flex justify-between mx-8 mt-4">
         <div v-if="!isEditing" class="label-text">
@@ -25,8 +25,8 @@
         </div>
       </div>
   <!-- Filter -->
-      <div class="flex justify-between ml-3">
-        <div class="flex">
+      <div class="flex justify-between w-100 ml-3">
+        <div class="flex items-center">
           <font-awesome-icon icon="fa-solid fa-calendar-days" class="mr-2 self-center"/>
           <div v-if="!isEditing" class="text-slate-400">
             {{ formatDate(album.expiry_date) }}
@@ -60,7 +60,7 @@
             class="photo-container flex justify-center"
           > -->
           <div class="photo-container flex justify-center cursor-pointer" @click="showPhoto(photo.id)">
-            <AdvancedImage :cldImg="getCloudinaryImage(photo.image)"
+            <AdvancedImage :cldImg="getCloudinaryImage(photo.image, photo.angle)"
               :id="photo.image" class="object-cover"
               :class="getPhotoClass(photo)"
             />
@@ -83,7 +83,7 @@
     <Photo v-if="isShowingPhoto"
       :photo="photoShowing"
       :photos="photos"
-      class="absolute border top-0 left-0 w-full z-50"
+      class="absolute top-0 left-0 w-full z-50"
       @reviewed-photo="(photo: Photo) => updatePhoto(photo)"
       @navigate-photo="(photoId: Number) => showPhoto(photoId)"
       @close-review-photo="closeReviewPhoto"
@@ -98,6 +98,7 @@ import { useRoute } from 'vue-router';
 import axios from 'axios';
 import { Cloudinary } from '@cloudinary/url-gen';
 import { AdvancedImage } from '@cloudinary/vue';
+import { byAngle } from '@cloudinary/url-gen/actions/rotate';
 // components
 import Photo from '../components/Photo.vue';
 import PhotoUpload from '../components/PhotoUpload.vue';
@@ -113,6 +114,7 @@ interface Album {
 interface Photo {
   id: number,
   image: string,
+  angle: number,
   album_id: number,
   review_results: number | null,
   created_at: Date,
@@ -136,13 +138,15 @@ onBeforeMount(async() => {
     });
 });
 
+// TODO: Add rotate button
+
 const cld = new Cloudinary({
   cloud: {
     cloudName: 'djnvimner',
   }
 });
-const getCloudinaryImage = (publicId: String) => {
-  return cld.image(`photo_review/${publicId}`);
+const getCloudinaryImage = (publicId: String, angle: number) => {
+  return cld.image(`photo_review/${publicId}`).rotate(byAngle(angle));
 }
 
 const albumId = computed(() => {

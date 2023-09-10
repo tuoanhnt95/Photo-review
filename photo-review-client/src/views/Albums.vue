@@ -1,8 +1,8 @@
 <template>
-  <div class="flex w-100 justify-center border">
+  <div class="flex w-100 justify-center">
     <div>
       <div :class="{'opacity-25': isCreatingAlbum}">
-        <div class="label-text ml-8 mt-4">
+        <div class="label-text mt-4">
           Albums
         </div>
 
@@ -26,7 +26,7 @@
                       class="object-cover"
                     />
                   </div>
-                  <div class="pl-1 text-md truncate text-white">
+                  <div class="pl-1 text-md truncate font-medium text-slate-500 dark:text-white">
                     {{ album.name }}
                   </div>
                   <div class="pl-1 text-xs text-slate-400">

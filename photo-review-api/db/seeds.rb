@@ -1,10 +1,4 @@
-# This file should contain all the record creation needed to seed the database with its default values.
-# The data can then be loaded with the bin/rails db:seed command (or created alongside the database with db:setup).
-#
-# Examples:
-#
-#   movies = Movie.create([{ name: "Star Wars" }, { name: "Lord of the Rings" }])
-#   Character.create(name: "Luke", movie: movies.first)
+# Run: rails db:seed
 puts 'Removing old data...'
 puts 'Removing photoUserReview data...'
 PhotoUserReview.destroy_all
@@ -63,16 +57,19 @@ Photo.create([
                {
                  name: 'Nikon-D3500-Shotkit-2',
                  image: 't7rmnsrnhlqhjhlqpo6y',
+                 angle: 0,
                  album_id: Album.first.id
                },
                {
                  name: 'Sony-a6000-Shotkit',
                  image: 'g6u80uqgthixbrpwmkxd',
+                 angle: 0,
                  album_id: Album.all[1].id
                },
                {
                  name: 'Fuijifilm-XH1-Shotkit',
                  image: 'bfvvvdvmazvayfepwmr1',
+                 angle: 0,
                  album_id: Album.all[2].id
                }
              ])

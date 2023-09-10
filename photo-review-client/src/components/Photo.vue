@@ -3,7 +3,7 @@
     <div class="relative container-no-nav-bar">
       <!-- Photo -->
       <div class="container-full-flex items-start">
-        <AdvancedImage v-if="props.photo" :cldImg="getCloudinaryImage(props.photo.image)"
+        <AdvancedImage v-if="props.photo" :cldImg="getCloudinaryImage(props.photo.image, photo.angle)"
           place-holder="predominant-color"
           class="object-contain"
         />
@@ -12,9 +12,14 @@
       <!-- Buttons -->
       <div class="container-layer w-full h-full grid grid-rows-3">
         <!-- Back to Album -->
-        <div class="row-start-1">
-          <div class="ml-5 mt-5 p-2 w-8 cursor-pointer text-slate-400" @click="backToAlbum()">
+        <div class="row-start-1 flex justify-between">
+          <div class="ml-5 mt-5 p-2 w-8 h-fit cursor-pointer text-slate-400" @click="backToAlbum">
             <font-awesome-icon icon="fa-solid fa-arrow-left"
+              class="text-xl opacity-30 hover:opacity-100"
+            />
+          </div>
+          <div class="mr-5 mt-5 p-2 w-8 h-fit cursor-pointer text-slate-400" @click="rotatePhoto">
+            <font-awesome-icon icon="fa-solid fa-rotate-left"
               class="text-xl opacity-30 hover:opacity-100"
             />
           </div>
@@ -78,13 +83,13 @@ interface Photo {
   id: number,
   name: string,
   image: string,
+  angle: number,
   album_id: number,
   review_results: number | null,
   created_at: Date,
   updated_at: Date
 }
 
-//TODO: pass photoId instead of photo so can track obect prop, when the whole object change cannot track
 // const photoId = computed(() => {
 //   const id = route.params.id;
 //   return typeof id === 'string' ? parseInt(id) : parseInt(id[0]);
@@ -125,8 +130,9 @@ const cld = new Cloudinary({
     cloudName: 'djnvimner',
   }
 });
-const getCloudinaryImage = (publicId: String) => {
-  return cld.image(`photo_review/${publicId}`).rotate(byAngle(-90));
+const getCloudinaryImage = (publicId: String, angle: number) => {
+  return cld.image(`photo_review/${publicId}`).rotate(byAngle(angle));
+  // return cld.image(`photo_review/${publicId}`);
 }
 
 // Review
@@ -154,13 +160,15 @@ function reviewPhoto (value: number) {
 }
 
 function saveReview () {
-  if (photo.value.review_results !== -1) {
+  if ((photo.value.review_results !== -1) ||
+      (props.photo.angle !== photo.value.angle)) {
     axios
       .put(`http://localhost:3000/photos/${photo.value.id}/photo_user_reviews`, {
-        review_value: photo.value.review_results
+        review_value: photo.value.review_results,
+        angle: photo.value.angle
       })
-      .then((response) => {
-        console.log('review after navigate: ', photo.value.review_results)
+      .then(() => {
+        return
       })
       .catch((error) => {
         console.log(error);
@@ -171,7 +179,6 @@ function saveReview () {
 // navigate
 function navigatePhoto (value: number) {
   saveReview();
-
   // emit navigate
   const index = photos.value.findIndex((pho: Photo) => pho.id === props.photo.id);
   // if first photo and navigate left, end
@@ -188,6 +195,11 @@ function navigatePhoto (value: number) {
 function backToAlbum () {
   saveReview();
   emit('close-review-photo');
+}
+
+// rotate photo
+function rotatePhoto () {
+  photo.value.angle = photo.value.angle - 90;
 }
 </script>
 

@@ -98,6 +98,7 @@ class PhotosController < ApplicationController
     Photo.new({
                 name: img[:img_name],
                 image: img[:img_url],
+                angle: 0,
                 album_id: photo_params[:album_id]
               })
   end
@@ -109,6 +110,6 @@ class PhotosController < ApplicationController
 
   # Only allow a list of trusted parameters through.
   def photo_params
-    params.permit(:image, :album_id, :upload_option, files: [])
+    params.permit(:image, :angle, :album_id, :upload_option, files: [])
   end
 end
