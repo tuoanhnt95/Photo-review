@@ -29,9 +29,14 @@ class PhotoUserReviewsController < ApplicationController
 
   # PATCH/PUT photos/:photo_id/photo_user_reviews
   def update
+    # if the angle change, update the photo
+    photo = Photo.find(params[:photo_id])
+    photo.update(angle: params[:angle]) if photo.angle != params[:angle]
+
     # get the review_id from review value in params
     review_value = params[:review_value]
-    review_id = Review.find_by(value: review_value).id
+    review_id = nil
+    review_id = Review.find_by(value: review_value).id unless review_value.nil?
     photo_user_review = find_review_by_photo_and_user
 
     # create a new review if it doesn't exist
@@ -98,6 +103,6 @@ class PhotoUserReviewsController < ApplicationController
 
   # Only allow a list of trusted parameters through.
   def photo_user_review_params
-    params.permit(:photo_id, :photo_user_review_id, :review_value)
+    params.permit(:photo_id, :photo_user_review_id, :review_value, :angle)
   end
 end
