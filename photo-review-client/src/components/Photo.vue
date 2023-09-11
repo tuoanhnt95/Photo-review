@@ -3,7 +3,7 @@
     <div class="relative container-no-nav-bar">
       <!-- Photo -->
       <div class="container-full-flex items-start">
-        <AdvancedImage v-if="props.photo" :cldImg="getCloudinaryImage(props.photo.image, photo.angle)"
+        <AdvancedImage v-if="props.photo" :cldImg="getCloudinaryImage(photo.image, photo.angle)"
           place-holder="predominant-color"
           class="object-contain"
         />
@@ -51,7 +51,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed, type PropType } from 'vue';
+import { ref, computed, type PropType, watch } from 'vue';
 import axios from 'axios';
 import { Cloudinary } from '@cloudinary/url-gen';
 import { byAngle } from '@cloudinary/url-gen/actions/rotate';
@@ -112,7 +112,7 @@ function saveReview () {
         angle: photo.value.angle
       })
       .then(() => {
-        return
+        return;
       })
       .catch((error) => {
         console.log(error);
@@ -142,9 +142,19 @@ function backToAlbum () {
 }
 
 // rotate photo
+const rotateCounter = ref(0);
 function rotatePhoto () {
-  photo.value.angle = photo.value.angle - 90;
+  if (rotateCounter.value === 3) {
+    rotateCounter.value = 0;
+  } else {
+    rotateCounter.value++;
+  }
+  photo.value.angle = photo.value.angle - rotateCounter.value * 90;
 }
+
+watch(() => props.photo, (newVal) => {
+  photo.value = newVal;
+});
 
 // display v-for
 const navigateDisplayOptions = [
