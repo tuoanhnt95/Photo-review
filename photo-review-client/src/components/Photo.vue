@@ -23,9 +23,15 @@
 
         <!-- Navigate -->
         <div class="row-start-2 self-center w-full flex justify-between">
-          <font-awesome-icon v-for="opt in navigateDisplayOptions" :key="opt.icon" :icon="`fa-solid fa-caret-${opt.icon}`"
-            :class="`btn-navigate-photo ${opt.class}`"
-            @click="navigatePhoto(opt.value)"
+          <font-awesome-icon icon="fa-solid fa-caret-left"
+            class="btn-navigate-photo ml-6"
+            :class="[ isFirstPhoto ? 'opacity-0': 'cursor-pointer' ]"
+            @click="navigatePhoto(-1)"
+          />
+          <font-awesome-icon icon="fa-solid fa-caret-right"
+            class="btn-navigate-photo mr-6"
+            :class="[ isLastPhoto ? 'opacity-0': 'cursor-pointer' ]"
+            @click="navigatePhoto(1)"
           />
         </div>
 
@@ -135,6 +141,16 @@ function navigatePhoto (value: number) {
   }
 }
 
+const isFirstPhoto = computed(() => {
+  const index = photos.value.findIndex((pho: Photo) => pho.id === props.photo.id);
+  return (index === 0);
+});
+
+const isLastPhoto = computed(() => {
+  const index = photos.value.findIndex((pho: Photo) => pho.id === props.photo.id);
+  return (index === photos.value.length - 1);
+});
+
 // back to album
 function backToAlbum () {
   saveReview();
@@ -175,7 +191,6 @@ const reviewDisplayOptions = [
 /* Navigation */
 .btn-navigate-photo {
   font-size: 40px;
-  cursor: pointer;
 }
 
 /* Button */
