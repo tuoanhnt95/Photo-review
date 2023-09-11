@@ -1,6 +1,6 @@
 <template>
   <div class="absolute top-0 left-0 w-full h-full">
-    <div class="relative w-full">
+    <div class="relative w-full" :class="{ 'opacity-10 saturate-0' : (isUploadingPhoto || isShowingPhoto)}">
       <div class="flex justify-between mx-8 mt-4">
         <div v-if="!isEditing" class="label-text">
           {{ album.name }}
@@ -72,14 +72,15 @@
           />
         </div>
       </div>
+    </div>
 
-      <PhotoUpload v-if="isUploadingPhoto"
+    <PhotoUpload v-if="isUploadingPhoto"
         :albumId="album.id"
         class="absolute w-full z-10"
         @uploaded-new-photo="(photos) => addPhoto(photos)"
         @close-upload-photo="isUploadingPhoto = false"
       />
-    </div>
+
     <Photo v-if="isShowingPhoto"
       :photo="photoShowing"
       :photos="photos"

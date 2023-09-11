@@ -5,7 +5,7 @@
       <div class="container-full-flex items-start">
         <AdvancedImage v-if="props.photo" :cldImg="getCloudinaryImage(photo.image, photo.angle)"
           place-holder="predominant-color"
-          class="object-contain"
+          class="object-contain w-full h-full"
         />
       </div>
 
@@ -118,6 +118,7 @@ function saveReview () {
         angle: photo.value.angle
       })
       .then(() => {
+        rotateCounter.value = 0;
         return;
       })
       .catch((error) => {
@@ -159,25 +160,24 @@ function backToAlbum () {
 
 // rotate photo
 const rotateCounter = ref(0);
+let photoOriginalAngle = props.photo.angle;
 function rotatePhoto () {
   if (rotateCounter.value === 3) {
     rotateCounter.value = 0;
+    photo.value.angle = photoOriginalAngle;
   } else {
     rotateCounter.value++;
+    photo.value.angle = photoOriginalAngle - (rotateCounter.value * 90);
+    console.log('1', photo.value.angle)
   }
-  photo.value.angle = photo.value.angle - rotateCounter.value * 90;
 }
 
 watch(() => props.photo, (newVal) => {
   photo.value = newVal;
+  photoOriginalAngle = newVal.angle;
 });
 
 // display v-for
-const navigateDisplayOptions = [
-  { value: -1, icon: 'left', class: 'ml-6' },
-  { value: 1, icon: 'right', class: 'mr-6' }
-];
-
 const reviewDisplayOptions = [
   { value: 0, icon: 'xmark' },
   { value: 2, icon: 'question' },
