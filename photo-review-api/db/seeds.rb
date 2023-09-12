@@ -10,6 +10,8 @@ puts 'Removing user data...'
 User.destroy_all
 puts 'Removing review data...'
 Review.destroy_all
+puts 'Removing upload data...'
+Upload.destroy_all
 
 #-----------------# Create new data #-----------------#
 puts 'Creating new data...'

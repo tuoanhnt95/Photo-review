@@ -1,4 +1,5 @@
 Rails.application.routes.draw do
+  resources :uploads
   resources :reviews
   resources :albums do
     resources :photos, only: %i[index create]

@@ -65,6 +65,12 @@
 import { ref, type PropType } from 'vue';
 import axios from 'axios';
 
+// create a model Upload in database
+// every file that gets uploaded or sent from the front end will be stored in the Upload table with an id, and completion status %
+// file name will be stored in the Upload table
+// once done, the result will be sent back to the front end with the file name and the completion status (using file name to identify the file)
+// once the upload is complete, the file will be moved to the Photo table with the album_id and the file path. Delete the completed upload from the Upload table
+// while uploading, make a call every second to the backend to get the completion status of the upload
 interface Photo {
   album_id: number,
   uploadOption: number
