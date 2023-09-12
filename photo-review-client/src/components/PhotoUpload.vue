@@ -1,12 +1,17 @@
 <template>
-  <div class="relative px-6 pt-16 pb-8 bg-white dark:bg-slate-800 border rounded">
+  <div class="relative px-6 pt-10 pb-8 bg-white dark:bg-slate-800 border rounded">
     <div class="mb-2 text-lg">
       Upload photos
     </div>
 
-    <div class="flex place-content-between w-full mb-6">
-      <div>Upload size:</div>
+<!-- Upload file -->
+    <div class="flex justify-center mb-3">
+      <input type="file" multiple @change="onChangeUploadPhoto($event)">
+    </div>
 
+    <div class="flex place-content-between w-full">
+      <div>Upload size:</div>
+<!-- Upload quality option -->
       <select v-model="photoUploadOption" class="text-slate-800">
         <option value="1">1080x720</option>
         <option value="2">1920x1080</option>
@@ -16,17 +21,39 @@
       </select>
     </div>
 
-    <div class="flex justify-center mb-2">
-      <input type="file" multiple @change="onChangeUploadPhoto($event)">
-    </div>
-DISABLE UPLOAD BUTTON IF NO FILE SELECTED
-
     <div>
-      <button @click="uploadPhoto" class="w-full mt-4 py-3 bg-violet-600 text-slate-200 rounded text-xl font-bold cursor-pointer">
+      <button @click="uploadPhoto"
+        class="w-full mt-4 py-3 text-slate-200 bg-violet-600 rounded text-xl font-bold"
+        :class="[ inputFiles.length === 0 ? 'opacity-30 cursor-not-allowed' : 'cursor-pointer']"
+      >
         Upload
       </button>
     </div>
 
+<!-- Upload progress -->
+    <div class="mt-2">
+      <div class="flex justify-center bg-gray-200 text-slate-600 cursor-pointer" @click="toggleUploadProgress">
+        <font-awesome-icon icon="fa-solid fa-grip-lines"/>
+      </div>
+      <div v-if="isExpanded" class="border w-full max-h-40 overflow-auto">
+        <div v-for="i in 7" :key="i" class="px-2">
+          <div class="flex justify-between mb-1">
+            <div>File {{ i }}</div>
+            <div>
+              <font-awesome-icon icon="fa-solid fa-x"
+                class="text-slate-400 cursor-pointer"
+                @click="cancelUpload()"
+              />
+            </div>
+          </div>
+          <div class="mb-4 h-1 bg-gray-200">
+            <div class="h-1 bg-violet-400" :style="`width: ${100 - i*15}%`"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+<!-- Close Upload menu -->
     <font-awesome-icon icon="fa-solid fa-x"
       class="absolute top-4 right-4 text-slate-400"
       @click="closeUploadPhoto()"
@@ -35,8 +62,9 @@ DISABLE UPLOAD BUTTON IF NO FILE SELECTED
 </template>
 
 <script setup lang="ts">
-import { ref, type PropType, computed } from 'vue';
+import { ref, type PropType } from 'vue';
 import axios from 'axios';
+
 interface Photo {
   album_id: number,
   uploadOption: number
@@ -47,13 +75,6 @@ interface Album {
   name: string,
   expiry_date: Date
 }
-
-// t.decimal "size"
-//     t.string "dimension"
-//     t.bigint "album_id", null: false
-//     t.datetime "created_at", null: false
-//     t.datetime "updated_at", null: false
-//     t.index ["album_id"], name: "index_photos_on_album_id"
 
 const props = defineProps({
   albumId: {
@@ -69,10 +90,6 @@ const props = defineProps({
 const $emit = defineEmits(['uploaded-new-photo', 'close-upload-photo']);
 
 const photoUploadOption = ref(1);
-// const photoFiles = computed<HTMLInputElement | null>(() => {
-//   return inputFiles.value;
-// });
-
 const inputFiles = ref([]);
 const onChangeUploadPhoto = (event: any) => {
   inputFiles.value = event.target.files;
@@ -101,6 +118,15 @@ const uploadPhoto = async() => {
     ).catch((error) => {
       console.log(error);
     });
+}
+
+const isExpanded = ref(true)
+function toggleUploadProgress () {
+  isExpanded.value = !isExpanded.value;
+}
+
+function cancelUpload () {
+  inputFiles.value = [];
 }
 
 const closeUploadPhoto = () => {
