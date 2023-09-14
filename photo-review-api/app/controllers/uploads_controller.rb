@@ -1,5 +1,5 @@
 class UploadsController < ApplicationController
-  before_action :set_upload, only: %i[ show update destroy ]
+  before_action :set_upload, only: %i[show update destroy]
 
   # GET /uploads
   def index
@@ -38,6 +38,16 @@ class UploadsController < ApplicationController
     @upload.destroy
   end
 
+  def show_progress
+    results = []
+    params[:files].each do |file|
+      upload = Upload.where(album_id: params[:album_id], name: file[:name])
+      results.push({ name: upload.name, progress: upload.progress }) if upload
+    end
+    results
+  end
+
+  # POST /uploads/increment_progress
   def increment_progress
     @upload = Upload.find_by(name: file.name, album_id: album_id)
     @upload.increment!(:progress)
@@ -45,13 +55,13 @@ class UploadsController < ApplicationController
   end
 
   private
-    # Use callbacks to share common setup or constraints between actions.
-    def set_upload
-      @upload = Upload.find(params[:id])
-    end
 
-    # Only allow a list of trusted parameters through.
-    def upload_params
-      params.require(:upload).permit(:name, :progress, :album_id)
-    end
+  def set_upload
+    @upload = Upload.find(params[:id])
+  end
+
+  # Only allow a list of trusted parameters through.
+  def upload_params
+    params.require(:upload).permit(:name, :progress, :album_id, files: [])
+  end
 end

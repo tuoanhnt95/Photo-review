@@ -25,11 +25,7 @@ class PhotosController < ApplicationController
   def create
     results = []
     photo_params[:files].each do |file|
-      upload = Upload.create({
-                               name: file.original_filename,
-                               progress: 0,
-                               album_id: photo_params[:album_id]
-                             })
+      upload = create_new_upload(file.original_filename)
       processed_image = ImageProcessor.call(file, photo_params[:upload_option], upload.id)
       photo = make_new_photo(processed_image)
       if photo.save
@@ -40,8 +36,6 @@ class PhotosController < ApplicationController
       end
     end
 
-    # processed_images = ImageProcessor.call(photo_params)
-    # results = save_photos_to_db(processed_images)
     if results.empty?
       render(json: { error: 'Error uploading images' }, status: :unprocessable_entity)
     else
@@ -67,6 +61,14 @@ class PhotosController < ApplicationController
   end
 
   private
+
+  def create_new_upload(file_name)
+    Upload.create({
+                    name: file_name,
+                    progress: 0,
+                    album_id: photo_params[:album_id]
+                  })
+  end
 
   def get_review_result(photo)
     user = User.first
