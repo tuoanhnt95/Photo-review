@@ -33,22 +33,27 @@ class ImageProcessor < ApplicationService
 
   def process_magicload(file_path, resized_width, resized_height)
     image = MiniMagick::Image.new(file_path).format 'jpg'
-    @upload['progress'] = 30
+    @upload.update(progress: 20)
+    p '---------------------------------'
+    p 'converting to jpg'
+    p @upload
+    p '---------------------------------'
+    @upload.update(progress: 30)
     p '---------------------------------'
     p 'reformatting to jpg'
-    p @upload.progress
+    p @upload
     p '---------------------------------'
     image.resize "#{resized_width}x#{resized_height}"
-    @upload['progress'] = 60
+    @upload.update(progress: 60)
     p '---------------------------------'
     p 'resizing'
-    p @upload.progress
+    p @upload
     p '---------------------------------'
     result = upload_image_to_cloudinary(image.path)
-    @upload['progress'] = 90
+    @upload.update(progress: 90)
     p '---------------------------------'
     p 'uploading to cloudinary'
-    p @upload.progress
+    p @upload
     p '---------------------------------'
     result
   end

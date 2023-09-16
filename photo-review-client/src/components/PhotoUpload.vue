@@ -108,7 +108,10 @@ const uploadPhoto = async() => {
   for (let i = 0; i < inputFiles.value.length; i++) {
     filesData.append('files[]', inputFiles.value[i]);
   }
-  getUploadProgress()
+  setTimeout(getProgress, 4000)
+  setTimeout(getProgress, 8000)
+  setTimeout(getProgress, 13000)
+  setTimeout(getProgress, 13660)
   await axios
     .post(`http://localhost:3000/albums/${props.albumId}/photos`,
       filesData,
@@ -124,7 +127,6 @@ const uploadPhoto = async() => {
     ).catch((error) => {
       console.log(error);
     });
-
 }
 
 const isExpanded = ref(true)
@@ -156,6 +158,7 @@ const inputFilesComputed = computed(() => {
 
 const uploadProgress = ref([] as Upload[]);
 watch(inputFilesComputed, () => {
+  console.log('input files computed changed', inputFilesComputed.value)
   uploadProgress.value = inputFilesComputed.value.map((file: File) => ({name: file.name, progress: 0}))
 });
 
@@ -171,25 +174,40 @@ const filesInProgress = computed(() => {
   return uploadProgress.value.filter((upload: Upload) => upload.progress < 100)
 })
 
-function getUploadProgress () {
-  console.log('start')
-  const getProgressRepeatedly = setInterval(getProgress, 1000) ;
+// function getUploadProgress () {
+//   console.log('start')
+//   getProgress()
+//   setTimeout(getUploadProgress, 1000)
+
+  // const getProgressRepeatedly = setInterval(getProgress, 1000) ;
     // call backend to get upload progress
     // with this album id, get the upload progress of items that are not completed
     // album id, file name. If there are multiple files with the same name, get the one not deleted and the last one
-  if (filesInProgress.value.length === 0) {
-    console.log('stop')
-    clearInterval(getProgressRepeatedly)
-  }
-}
+  // if (filesInProgress.value.length === 0) {
+  //   console.log('stop')
+  //   clearInterval(getProgressRepeatedly)
+  // }
+// }
 
 // write two functions, one to call backend at interval of 1 second
 // another to clear interval when upload is complete
-async function getProgress () {
-  await axios
-    .get(`http://localhost:3000/albums/${props.albumId}/upload_progress`)
+function getProgress () {
+  const filesInProgressName = filesInProgress.value.map((upload: Upload) => upload.name)
+  // const queryString = 'files=' + filesInProgressName.join('&files=')
+  const queryString = '?files=' + encodeURIComponent(JSON.stringify(filesInProgressName))
+
+  console.log('getProgress', uploadProgress.value)
+  console.log('url', `http://localhost:3000/albums/${props.albumId}/upload_progress${queryString}`)
+  axios
+    .get(`http://localhost:3000/albums/${props.albumId}/upload_progress` + queryString,
+      {
+        headers: {
+          'Content-Type': 'application/json'
+        }
+      }
+    )
     .then((response) => {
-      console.log('234', response.data)
+      console.log('234', response)
       // update uploadProgress for any file that is not completed
       response.data.forEach((element: Upload) => {
         const index = uploadProgress.value.findIndex((upload: Upload) => upload.name === element.name)

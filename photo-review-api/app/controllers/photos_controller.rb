@@ -26,11 +26,12 @@ class PhotosController < ApplicationController
     results = []
     photo_params[:files].each do |file|
       upload = create_new_upload(file.original_filename)
+      upload.update(progress: 15)
       processed_image = ImageProcessor.call(file, photo_params[:upload_option], upload.id)
       photo = make_new_photo(processed_image)
       if photo.save
         results.push(photo)
-        upload.progress = 100
+        upload.update(progress: 100)
       else
         render json: photo.errors, status: :unprocessable_entity
       end
@@ -64,10 +65,10 @@ class PhotosController < ApplicationController
 
   def create_new_upload(file_name)
     Upload.create({
-                    name: file_name,
-                    progress: 0,
-                    album_id: photo_params[:album_id]
-                  })
+                   name: file_name,
+                   progress: 0,
+                   album_id: photo_params[:album_id]
+                 })
   end
 
   def get_review_result(photo)

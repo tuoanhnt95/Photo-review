@@ -1,5 +1,9 @@
+require 'open-uri'
+
 class UploadsController < ApplicationController
   before_action :set_upload, only: %i[show update destroy]
+  skip_before_action :verify_authenticity_token
+  skip_before_action :authenticate_user!
 
   # GET /uploads
   def index
@@ -40,10 +44,27 @@ class UploadsController < ApplicationController
 
   def show_progress
     results = []
-    params[:files].each do |file|
-      upload = Upload.where(album_id: params[:album_id], name: file[:name])
-      results.push({ name: upload.name, progress: upload.progress }) if upload
+    files = JSON.parse(params[:files])
+    files.each do |file|
+      upload = Upload.where(album_id: params[:album_id], name: file).last
+      p '---------------------------------'
+      p 'upload'
+      p upload
+      # every time upload, increment album last upload batch
+      p '---------------------------------'
+      # upload.each do |key|
+      p '---------------------------------'
+      p 'progress'
+      # p key
+      p upload.progress
+      p '---------------------------------'
+      results.push({ name: upload.name, progress: upload.progress })
+      # end
     end
+    p '---------------------------------'
+    p 'results'
+    p results
+    p '---------------------------------'
     results
   end
 
@@ -62,6 +83,6 @@ class UploadsController < ApplicationController
 
   # Only allow a list of trusted parameters through.
   def upload_params
-    params.require(:upload).permit(:name, :progress, :album_id, files: [])
+    params.require(:upload).permit(:name, :progress, :album_id, :files)
   end
 end
