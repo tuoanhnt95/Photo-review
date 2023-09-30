@@ -35,8 +35,12 @@ import axios from 'axios';
 interface Album {
   id: number,
   name: string,
-  expiry_date: Date
+  expiry_date: Date,
+  last_upload_batch: number
 }
+
+// TODO: add upload batch to all Album object.
+// need upload batch to manage upload files
 
 const props = defineProps({
   albums: {
