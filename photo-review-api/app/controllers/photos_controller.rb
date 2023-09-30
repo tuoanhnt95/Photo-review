@@ -1,5 +1,9 @@
+# frozen_string_literal: true
+
+# Photos controller
 class PhotosController < ApplicationController
   before_action :set_photo, only: %i[show update destroy]
+  before_action :set_album, only: %i[index create create_new_upload]
   skip_before_action :verify_authenticity_token
   skip_before_action :authenticate_user!
 
@@ -23,10 +27,12 @@ class PhotosController < ApplicationController
 
   # POST /albums/:album_id/photos
   def create
+    @album.increment!(:last_upload_batch)
     results = []
+
     photo_params[:files].each do |file|
       upload = create_new_upload(file.original_filename)
-      upload.update(progress: 15)
+      
       processed_image = ImageProcessor.call(file, photo_params[:upload_option], upload.id)
       photo = make_new_photo(processed_image)
       if photo.save
@@ -65,10 +71,11 @@ class PhotosController < ApplicationController
 
   def create_new_upload(file_name)
     Upload.create({
-                   name: file_name,
-                   progress: 0,
-                   album_id: photo_params[:album_id]
-                 })
+                    name: file_name,
+                    progress: 15,
+                    batch: @album.last_upload_batch,
+                    album_id: photo_params[:album_id]
+                  })
   end
 
   def get_review_result(photo)
@@ -123,6 +130,10 @@ class PhotosController < ApplicationController
   end
 
   # Use callbacks to share common setup or constraints between actions.
+  def set_album
+    @album = Album.find(params[:album_id])
+  end
+
   def set_photo
     @photo = Photo.find(params[:id])
   end

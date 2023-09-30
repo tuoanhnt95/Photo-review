@@ -1,7 +1,11 @@
+# frozen_string_literal: true
+
 require 'open-uri'
 
+# Uploads controller
 class UploadsController < ApplicationController
   before_action :set_upload, only: %i[show update destroy]
+  before_action :set_album, only: %i[create show_progress]
   skip_before_action :verify_authenticity_token
   skip_before_action :authenticate_user!
 
@@ -46,36 +50,34 @@ class UploadsController < ApplicationController
     results = []
     files = JSON.parse(params[:files])
     files.each do |file|
-      upload = Upload.where(album_id: params[:album_id], name: file).last
+      upload = Upload.find_by(album_id: params[:album_id], name: file, batch: @album.last_upload_batch)
       p '---------------------------------'
       p 'upload'
-      p upload
-      # every time upload, increment album last upload batch
-      p '---------------------------------'
-      # upload.each do |key|
-      p '---------------------------------'
-      p 'progress'
-      # p key
-      p upload.progress
-      p '---------------------------------'
-      results.push({ name: upload.name, progress: upload.progress })
-      # end
+      if upload
+        p upload
+        p '---------------------------------'
+        p 'progress'
+        p upload.progress
+        p '---------------------------------'
+        results.push({ name: upload.name, progress: upload.progress }) if upload
+      else
+        p 'empty'
+        p '---------------------------------'
+        results.push({ name: file, progress: 0 })
+      end
     end
     p '---------------------------------'
     p 'results'
     p results
     p '---------------------------------'
-    results
-  end
-
-  # POST /uploads/increment_progress
-  def increment_progress
-    @upload = Upload.find_by(name: file.name, album_id: album_id)
-    @upload.increment!(:progress)
-    render json: @upload
+    render json: results
   end
 
   private
+
+  def set_album
+    @album = Album.find(params[:album_id])
+  end
 
   def set_upload
     @upload = Upload.find(params[:id])
@@ -83,6 +85,6 @@ class UploadsController < ApplicationController
 
   # Only allow a list of trusted parameters through.
   def upload_params
-    params.require(:upload).permit(:name, :progress, :album_id, :files)
+    params.require(:upload).permit(:name, :progress, :album_id, :files, :batch)
   end
 end

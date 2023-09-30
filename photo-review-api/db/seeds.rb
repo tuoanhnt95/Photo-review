@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 # Run: rails db:seed
 puts 'Removing old data...'
 puts 'Removing photoUserReview data...'
