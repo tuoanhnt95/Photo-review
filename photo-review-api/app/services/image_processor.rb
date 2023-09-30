@@ -3,32 +3,27 @@ require 'vips'
 require 'cloudinary'
 
 class ImageProcessor < ApplicationService
-  def initialize(image_params)
-    @image_params = image_params
-    @files = @image_params[:files]
-    @upload_option = @image_params[:upload_option]
+  def initialize(file, upload_option, upload_id)
+    @file = file
+    @upload_option = upload_option
+    @upload = Upload.find(upload_id)
   end
 
   def call
-    processed_images = []
-
-    @files.each do |file|
-      file_name_without_extension = file.original_filename.split('.')[0]
-      cloudinary_image = process_image(file)
-      url = cloudinary_image['secure_url']
-      public_id = cloudinary_public_id(url)
-      processed_images.push({ img_name: file_name_without_extension, img_url: public_id })
-    end
-    processed_images
+    file_name_without_extension = @file.original_filename.split('.')[0]
+    cloudinary_image = process_image
+    url = cloudinary_image['secure_url']
+    public_id = cloudinary_public_id(url)
+    { img_name: file_name_without_extension, img_url: public_id }
   end
 
   private
 
-  def process_image(file)
-    file_path = file.tempfile.path
-    file_name = file.original_filename
+  def process_image
+    file_path = @file.tempfile.path
+    file_name = @file.original_filename
     resized_width, resized_height = get_image_resized(@upload_option)
-    use_magicload = image_uses_magicload(file.original_filename)
+    use_magicload = image_uses_magicload(@file.original_filename)
     if use_magicload
       process_magicload(file_path, resized_width, resized_height)
     else
@@ -38,8 +33,29 @@ class ImageProcessor < ApplicationService
 
   def process_magicload(file_path, resized_width, resized_height)
     image = MiniMagick::Image.new(file_path).format 'jpg'
+    @upload.update(progress: 20)
+    p '---------------------------------'
+    p 'converting to jpg'
+    p @upload
+    p '---------------------------------'
+    @upload.update(progress: 30)
+    p '---------------------------------'
+    p 'reformatting to jpg'
+    p @upload
+    p '---------------------------------'
     image.resize "#{resized_width}x#{resized_height}"
-    upload_image_to_cloudinary(image.path)
+    @upload.update(progress: 60)
+    p '---------------------------------'
+    p 'resizing'
+    p @upload
+    p '---------------------------------'
+    result = upload_image_to_cloudinary(image.path)
+    @upload.update(progress: 90)
+    p '---------------------------------'
+    p 'uploading to cloudinary'
+    p @upload
+    p '---------------------------------'
+    result
   end
 
   def process_libvips(file_path, file_name, resized_width, resized_height)

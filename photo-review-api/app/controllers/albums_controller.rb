@@ -1,3 +1,6 @@
+# frozen_string_literal: true
+
+# Albums controller
 class AlbumsController < ApplicationController
   before_action :set_album, only: %i[ show update destroy ]
   skip_before_action :verify_authenticity_token
@@ -29,6 +32,7 @@ class AlbumsController < ApplicationController
     @album = Album.new(album_params)
     # @album.user = current_user
     @album.user = User.first
+    @album.last_upload_batch = 0
 
     if @album.save
       render json: @album, status: :created, location: @album
@@ -65,6 +69,6 @@ class AlbumsController < ApplicationController
 
   # Only allow a list of trusted parameters through.
   def album_params
-    params.require(:album).permit(:name, :expiry_date, :user_id)
+    params.require(:album).permit(:name, :expiry_date, :user_id, :last_upload_batch)
   end
 end

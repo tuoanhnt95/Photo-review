@@ -1,12 +1,12 @@
 # frozen_string_literal: true
 
-# CreatePhotos migration
-class CreatePhotos < ActiveRecord::Migration[7.0]
+# CreateUploads migration
+class CreateUploads < ActiveRecord::Migration[7.0]
   def change
-    create_table :photos do |t|
+    create_table :uploads do |t|
       t.string :name
-      t.string :image
-      t.numeric :angle
+      t.integer :progress
+      t.integer :batch
       t.references :album, null: false, foreign_key: true
 
       t.timestamps
