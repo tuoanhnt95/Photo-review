@@ -79,18 +79,19 @@ interface Photo {
 interface Album {
   id: number,
   name: string,
+  last_upload_batch: number,
   expiry_date: Date
 }
 
 const props = defineProps({
-  albumId: {
-    type: Number as PropType<number>,
+  // albumId: {
+  //   type: Number as PropType<number>,
+  //   required: true
+  // },
+  album: {
+    type: Object as PropType<Album>,
     required: true
   }
-  // album: {
-  //   type: Object as PropType<Album>,
-  //   required: true
-  // }
 })
 
 const $emit = defineEmits(['uploaded-new-photo', 'close-upload-photo']);
@@ -103,17 +104,20 @@ const onChangeUploadPhoto = (event: any) => {
 
 const uploadPhoto = async() => {
   const filesData = new FormData();
-  filesData.append('album_id', props.albumId.toString());
+  filesData.append('album_id', props.album.id.toString());
   filesData.append('upload_option', photoUploadOption.value.toString());
   for (let i = 0; i < inputFiles.value.length; i++) {
     filesData.append('files[]', inputFiles.value[i]);
   }
+  setTimeout(getProgress, 2000)
   setTimeout(getProgress, 4000)
   setTimeout(getProgress, 8000)
-  setTimeout(getProgress, 13000)
-  setTimeout(getProgress, 13660)
+  setTimeout(getProgress, 9000)
+  // setTimeout(getProgress, 10000)
+  // setTimeout(getProgress, 11000)
+  // setTimeout(getProgress, 13660)
   await axios
-    .post(`http://localhost:3000/albums/${props.albumId}/photos`,
+    .post(`http://localhost:3000/albums/${props.album.id}/photos`,
       filesData,
       {
         headers: {
@@ -159,7 +163,11 @@ const inputFilesComputed = computed(() => {
 const uploadProgress = ref([] as Upload[]);
 watch(inputFilesComputed, () => {
   console.log('input files computed changed', inputFilesComputed.value)
-  uploadProgress.value = inputFilesComputed.value.map((file: File) => ({name: file.name, progress: 0}))
+  uploadProgress.value = inputFilesComputed.value.map((file: File) => (
+    {
+      name: file.name,
+      progress: 0
+    }))
 });
 
 const check = computed(() => {
@@ -197,9 +205,8 @@ function getProgress () {
   const queryString = '?files=' + encodeURIComponent(JSON.stringify(filesInProgressName))
 
   console.log('getProgress', uploadProgress.value)
-  console.log('url', `http://localhost:3000/albums/${props.albumId}/upload_progress${queryString}`)
   axios
-    .get(`http://localhost:3000/albums/${props.albumId}/upload_progress` + queryString,
+    .get(`http://localhost:3000/albums/${props.album.id}/upload_progress` + queryString,
       {
         headers: {
           'Content-Type': 'application/json'

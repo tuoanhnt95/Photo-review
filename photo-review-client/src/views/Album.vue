@@ -75,13 +75,13 @@
     </div>
 
     <PhotoUpload v-if="isUploadingPhoto"
-        :albumId="album.id"
-        class="absolute w-full z-10"
-        @uploaded-new-photo="(photos) => addPhoto(photos)"
-        @close-upload-photo="isUploadingPhoto = false"
-      />
+      :album="album"
+      class="absolute w-full z-10"
+      @uploaded-new-photo="(photos) => addPhoto(photos)"
+      @close-upload-photo="isUploadingPhoto = false"
+    />
 
-    <Photo v-if="isShowingPhoto"
+    <Photo v-if="isShowingPhoto && photoShowing"
       :photo="photoShowing"
       :photos="photos"
       class="absolute top-0 left-0 w-full z-50"
@@ -109,11 +109,13 @@ const route = useRoute();
 interface Album {
   id: number,
   name: string,
+  last_upload_batch: number,
   expiry_date: Date
 }
 
 interface Photo {
   id: number,
+  name: string,
   image: string,
   angle: number,
   album_id: number,
@@ -123,8 +125,9 @@ interface Photo {
 }
 
 const album = ref<Album>({
-  id: 0,
+  id: -1,
   name: '',
+  last_upload_batch: 0,
   expiry_date: new Date()
 });
 onBeforeMount(async() => {
@@ -252,7 +255,8 @@ function numberOfPhotosWithReview(val: number | null) {
 
 // photo review
 const isShowingPhoto = ref(false);
-const photoShowing = ref<Photo | null>();
+const photoShowing = ref<Photo>();
+// const photoShowing = ref<Photo | null>();
 const showPhoto = (photoId: Number) => {
   photoShowing.value = photosData.value.find((x) => x.id === photoId);
   isShowingPhoto.value = true;
@@ -263,7 +267,7 @@ const updatePhoto = (photo: Photo) => {
 }
 function closeReviewPhoto() {
   isShowingPhoto.value = false;
-  photoShowing.value = null;
+  // photoShowing.value = {};
 }
 
 // style
