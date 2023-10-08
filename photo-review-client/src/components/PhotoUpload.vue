@@ -137,7 +137,7 @@ const closeUploadPhoto = () => {
 // upload progress
 interface Upload {
   name: string,
-  progress: number,
+  progress: number
 }
 
 const uploads = ref([] as Upload[]);
