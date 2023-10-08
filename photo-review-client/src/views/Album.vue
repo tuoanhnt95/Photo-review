@@ -56,9 +56,6 @@
           <font-awesome-icon icon="fa-solid fa-plus" class="m-auto text-violet-600"/>
         </div>
         <div v-for="(photo, i) in photos" :key="i" class="relative cursor-pointer">
-          <!-- <RouterLink :to="{ name: 'Photo', params: { id: photo.id } }"
-            class="photo-container flex justify-center"
-          > -->
           <div class="photo-container flex justify-center cursor-pointer" @click="showPhoto(photo.id)">
             <AdvancedImage :cldImg="getCloudinaryImage(photo.image, photo.angle)"
               :id="photo.image" class="object-cover"
@@ -208,7 +205,8 @@ const removePhoto = (photoId: number) => {
 }
 const addPhoto = (photos: [Photo]) => {
   photos.forEach(photo => {
-    photosData.value.unshift(photo);
+    // photosData.value.unshift(photo);
+    photosData.value.push(photo);
   });
 }
 

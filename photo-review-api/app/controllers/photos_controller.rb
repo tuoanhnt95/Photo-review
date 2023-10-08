@@ -32,7 +32,7 @@ class PhotosController < ApplicationController
 
     photo_params[:files].each do |file|
       upload = create_new_upload(file.original_filename)
-      
+
       processed_image = ImageProcessor.call(file, photo_params[:upload_option], upload.id)
       photo = make_new_photo(processed_image)
       if photo.save
