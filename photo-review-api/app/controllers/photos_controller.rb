@@ -31,6 +31,9 @@ class PhotosController < ApplicationController
     results = []
 
     photo_params[:files].each do |file|
+      # whitelist file types
+      next unless whitelist_file_types.include?(file.original_filename.split('.').last.downcase)
+
       upload = create_new_upload(file.original_filename)
 
       processed_image = ImageProcessor.call(file, photo_params[:upload_option], upload.id)
@@ -68,6 +71,10 @@ class PhotosController < ApplicationController
   end
 
   private
+
+  def whitelist_file_types
+    %w[arw bmp cr2 crw dng heic jpg jpeg nef nrw orf pef png raf srw tif tiff]
+  end
 
   def create_new_upload(file_name)
     Upload.create({

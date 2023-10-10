@@ -95,7 +95,7 @@ class ImageProcessor < ApplicationService
   end
 
   def image_uses_magicload(file_name)
-    magickload_formats = %w[arw cr2 crw dng nef nrw orf pef raf srw]
+    magickload_formats = %w[arw cr2 crw dng heic nef nrw orf pef raf srw]
     # magickload_formats = %w[arw cr2 crw dng nef nrw orf pef raf srw rw2 x3f gpr]
     image_extension(file_name).in? magickload_formats
   end

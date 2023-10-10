@@ -6,10 +6,29 @@
 
 <!-- Upload file -->
     <div class="flex justify-center mb-3">
-      <input type="file" multiple @change="onChangeUploadPhoto($event)">
+      <input type="file" :accept="validFileExtensionsAndMimeTypesString" multiple @change="onChangeUploadPhoto($event)">
     </div>
 
-    <div class="flex place-content-between w-full">
+    <div v-if="hasInvalidFile" class="text-xs text-red-500">
+      <span class="underline" @click="toggleInvalidList">
+        Include invalid file format!
+      </span>
+      <ul v-if="showInvalidFileList">
+        <li v-for="fileName in invalidFileNames" :key="fileName">
+          {{ fileName }}
+        </li>
+      </ul>
+    </div>
+    <div>
+      <span class="underline text-xs" @click="toggleValidExtensions">
+        Valid file formats
+      </span>
+    </div>
+    <div v-if="showValidExtensionList" class="inline-block text-xs italic">
+      {{ validFileExtensionsString }}
+    </div>
+
+    <div class="flex place-content-between w-full mt-2">
       <div>Upload size:</div>
 <!-- Upload quality option -->
       <select v-model="photoUploadOption" class="text-slate-800">
@@ -24,7 +43,7 @@
     <div>
       <button @click="uploadPhoto"
         class="w-full mt-4 py-3 text-slate-200 bg-violet-600 rounded text-xl font-bold"
-        :class="[ inputFiles.length === 0 ? 'opacity-30 cursor-not-allowed' : 'cursor-pointer']"
+        :class="[ canUpload ? 'cursor-pointer' : 'opacity-30 cursor-not-allowed' ]"
       >
         Upload
       </button>
@@ -62,7 +81,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, type PropType, watch } from 'vue';
+import { ref, type PropType, watch, computed } from 'vue';
 import axios from 'axios';
 
 interface Photo {
@@ -86,13 +105,48 @@ const props = defineProps({
 
 const $emit = defineEmits(['uploaded-new-photo', 'close-upload-photo']);
 
+// validate file extension
+const showValidExtensionList = ref(false);
+const validFileExtensions = ['.arw', '.bmp', '.cr2', '.crw', '.dng', '.heic', '.jpg', '.jpeg', '.nef', '.nrw', '.orf', '.pef', '.png', '.raf', '.srw', '.tif', '.tiff'];
+const mimeType = ['image/jpeg', 'image/png', 'image/tiff', 'image/bmp', 'image/x-canon-cr2', 'image/x-canon-crw', 'image/x-dcraw', 'image/x-adobe-dng', 'image/x-fuji-raf', 'image/x-nikon-nef', 'image/x-nikon-nrw', 'image/x-olympus-orf', 'image/x-panasonic-raw', 'image/x-pentax-pef', 'image/x-sony-arw', 'image/x-sony-srw', 'image/heic', 'image/ARW', 'image/BMP', 'image/CR2', 'image/CRW', 'image/DNG', 'image/HEIC', 'image/JPG', 'image/JPEG', 'image/NEF', 'image/NRW', 'image/ORF', 'image/PEF', 'image/PNG', 'image/RAF', 'image/SRW', 'image/TIF', 'image/TIFF'];
+function toggleValidExtensions () {
+  showValidExtensionList.value = !showValidExtensionList.value;
+}
+const validFileExtensionsString = validFileExtensions.join(', ');
+const validMimeTypesString = mimeType.join(', ');
+const validFileExtensionsAndMimeTypesString = validFileExtensionsString + ', ' + validMimeTypesString;
+
+const hasInvalidFile = ref(false);
+const invalidFileNames = ref([] as string[]);
+const canUpload = computed(() => {
+  return inputFiles.value.length > 0 && !hasInvalidFile.value
+})
+const showInvalidFileList = ref(false);
+function toggleInvalidList () {
+  showInvalidFileList.value = !showInvalidFileList.value;
+}
+
 const photoUploadOption = ref(1);
-const inputFiles = ref([]);
+const inputFiles = ref([] as File[]);
+
 const onChangeUploadPhoto = (event: any) => {
-  inputFiles.value = event.target.files;
+  [...event.target.files].forEach((file: File) => {
+    const ext = '.' + file.name.match(/\.([^\.]+)$/)![1].toLowerCase();
+    if (!validFileExtensions.includes(ext)) {
+      hasInvalidFile.value = true
+      invalidFileNames.value.push(file.name)
+    } else {
+      inputFiles.value.push(file);
+    }
+  });
 }
 
 const uploadPhoto = async() => {
+  if (!canUpload.value) {
+    return
+  }
+
+  // upload photo
   const filesData = new FormData();
   filesData.append('album_id', props.album.id.toString());
   filesData.append('upload_option', photoUploadOption.value.toString());
