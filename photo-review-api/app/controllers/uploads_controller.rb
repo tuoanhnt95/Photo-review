@@ -1,9 +1,10 @@
 # frozen_string_literal: true
-
 require 'open-uri'
+require './lib/modules/file_input.rb'
 
 # Uploads controller
 class UploadsController < ApplicationController
+  include FileInput
   before_action :set_upload, only: %i[show update destroy]
   before_action :set_album, only: %i[create show_progress]
   skip_before_action :verify_authenticity_token
@@ -48,28 +49,26 @@ class UploadsController < ApplicationController
 
   def show_progress
     results = []
-    files = JSON.parse(params[:files])
-    files.each do |file|
-      upload = Upload.find_by(album_id: params[:album_id], name: file, batch: @album.last_upload_batch)
-      p '---------------------------------'
-      p 'upload'
+    file_names = JSON.parse(params[:file_names])
+    file_types = JSON.parse(params[:file_types])
+    file_names.each_with_index do |file_name, i|
+
+      file_names.each_with_index do |file_name, i|
+        return render(json: { error: 'Invalid file type.' }, status: :unprocessable_entity) unless check_file_type_whitelist!(file_name, file_types[i])
+      end
+
+      upload = Upload.find_by(
+        album_id: params[:album_id],
+        name: file_name,
+        batch: @album.last_upload_batch
+      )
+
       if upload
-        p upload
-        p '---------------------------------'
-        p 'progress'
-        p upload.progress
-        p '---------------------------------'
         results.push({ name: upload.name, progress: upload.progress }) if upload
       else
-        p 'empty'
-        p '---------------------------------'
-        results.push({ name: file, progress: 0 })
+        results.push({ name: file_name, progress: 0 })
       end
     end
-    p '---------------------------------'
-    p 'results'
-    p results
-    p '---------------------------------'
     render json: results
   end
 
@@ -85,6 +84,6 @@ class UploadsController < ApplicationController
 
   # Only allow a list of trusted parameters through.
   def upload_params
-    params.require(:upload).permit(:name, :progress, :album_id, :files, :batch)
+    params.require(:upload).permit(:name, :progress, :album_id, :file_names, :file_types, :batch)
   end
 end

@@ -82,6 +82,7 @@ ActiveRecord::Schema[7.0].define(version: 2023_09_12_141053) do
 
   create_table "uploads", force: :cascade do |t|
     t.string "name"
+    t.string "file_type"
     t.integer "progress"
     t.integer "batch"
     t.bigint "album_id", null: false

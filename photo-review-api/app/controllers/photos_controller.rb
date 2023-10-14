@@ -1,7 +1,9 @@
 # frozen_string_literal: true
+require './lib/modules/file_input.rb'
 
 # Photos controller
 class PhotosController < ApplicationController
+  include FileInput
   before_action :set_photo, only: %i[show update destroy]
   before_action :set_album, only: %i[index create create_new_upload]
   skip_before_action :verify_authenticity_token
@@ -31,10 +33,15 @@ class PhotosController < ApplicationController
     results = []
 
     photo_params[:files].each do |file|
-      upload = create_new_upload(file.original_filename)
+      # whitelist file types
+      return render(json: { error: 'Invalid file type.' }, status: :unprocessable_entity) unless check_file_type_whitelist!(file.original_filename, file.content_type)
+    end
+
+    photo_params[:files].each do |file|
+      upload = create_new_upload(file)
 
       processed_image = ImageProcessor.call(file, photo_params[:upload_option], upload.id)
-      photo = make_new_photo(processed_image)
+      photo = Photo.make_new_photo(processed_image, photo_params[:album_id])
       if photo.save
         results.push(photo)
         upload.update(progress: 100)
@@ -69,9 +76,10 @@ class PhotosController < ApplicationController
 
   private
 
-  def create_new_upload(file_name)
+  def create_new_upload(file)
     Upload.create({
-                    name: file_name,
+                    name: file.original_filename,
+                    file_type: file.content_type,
                     progress: 15,
                     batch: @album.last_upload_batch,
                     album_id: photo_params[:album_id]
@@ -105,28 +113,6 @@ class PhotosController < ApplicationController
 
   def reviews_all_no?(values)
     values.all?(&:zero?)
-  end
-
-  def save_photos_to_db(processed_images)
-    result = []
-    processed_images.each do |img|
-      photo = make_new_photo(img)
-      if photo.save
-        result.push(photo)
-      else
-        render json: photo.errors, status: :unprocessable_entity
-      end
-    end
-    result
-  end
-
-  def make_new_photo(img)
-    Photo.new({
-                name: img[:img_name],
-                image: img[:img_url],
-                angle: 0,
-                album_id: photo_params[:album_id]
-              })
   end
 
   # Use callbacks to share common setup or constraints between actions.

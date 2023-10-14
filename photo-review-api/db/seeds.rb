@@ -66,7 +66,7 @@ Photo.create([
                },
                {
                  name: 'Sony-a6000-Shotkit',
-                 image: 'g6u80uqgthixbrpwmkxd',
+                 image: 'rmsuqgcmfkqm6vfetfd0',
                  angle: 0,
                  album_id: Album.all[1].id
                },
