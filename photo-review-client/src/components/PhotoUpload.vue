@@ -9,23 +9,18 @@
       <input type="file" :accept="validFileExtensionsAndMimeTypesString" multiple @change="onChangeUploadPhoto($event)">
     </div>
 
-    <div v-if="hasInvalidFile" class="text-xs text-red-500">
-      <span class="underline" @click="toggleInvalidList">
+    <div v-if="hasInvalidFile" class="text-xs">
+      <span class="underline text-red-500" @click="toggleInvalidList">
         Include invalid file format!
       </span>
-      <ul v-if="showInvalidFileList">
-        <li v-for="fileName in invalidFileNames" :key="fileName">
-          {{ fileName }}
-        </li>
-      </ul>
-    </div>
-    <div>
-      <span class="underline text-xs" @click="toggleValidExtensions">
-        Valid file formats
-      </span>
-    </div>
-    <div v-if="showValidExtensionList" class="inline-block text-xs italic">
-      {{ validFileExtensionsString }}
+      <div v-if="showInvalidFileList" class="mt-2">
+        <span>
+          VALID:
+        </span>
+        <div class="inline-block m-1">
+          {{ validFileExtensionsString }}
+        </div>
+      </div>
     </div>
 
     <div class="flex place-content-between w-full mt-2">
@@ -50,7 +45,7 @@
     </div>
 
 <!-- Upload progress -->
-    <div class="mt-2">
+    <div v-if="canUpload" class="mt-2">
       <div class="flex justify-center bg-gray-200 text-slate-600 cursor-pointer" @click="toggleUploads">
         <font-awesome-icon icon="fa-solid fa-grip-lines"/>
       </div>
@@ -84,11 +79,6 @@
 import { ref, type PropType, watch, computed } from 'vue';
 import axios from 'axios';
 
-interface Photo {
-  album_id: number,
-  uploadOption: number
-}
-
 interface Album {
   id: number,
   name: string,
@@ -106,18 +96,14 @@ const props = defineProps({
 const $emit = defineEmits(['uploaded-new-photo', 'close-upload-photo']);
 
 // validate file extension
-const showValidExtensionList = ref(false);
 const validFileExtensions = ['.arw', '.bmp', '.cr2', '.crw', '.dng', '.heic', '.jpg', '.jpeg', '.nef', '.nrw', '.orf', '.pef', '.png', '.raf', '.srw', '.tif', '.tiff'];
-const mimeType = ['image/jpeg', 'image/png', 'image/tiff', 'image/bmp', 'image/x-canon-cr2', 'image/x-canon-crw', 'image/x-dcraw', 'image/x-adobe-dng', 'image/x-fuji-raf', 'image/x-nikon-nef', 'image/x-nikon-nrw', 'image/x-olympus-orf', 'image/x-panasonic-raw', 'image/x-pentax-pef', 'image/x-sony-arw', 'image/x-sony-srw', 'image/heic', 'image/ARW', 'image/BMP', 'image/CR2', 'image/CRW', 'image/DNG', 'image/HEIC', 'image/JPG', 'image/JPEG', 'image/NEF', 'image/NRW', 'image/ORF', 'image/PEF', 'image/PNG', 'image/RAF', 'image/SRW', 'image/TIF', 'image/TIFF'];
-function toggleValidExtensions () {
-  showValidExtensionList.value = !showValidExtensionList.value;
-}
+const mimeType = ['', 'image/jpeg', 'image/png', 'image/tiff', 'image/bmp', 'image/x-canon-cr2', 'image/x-canon-crw', 'image/x-dcraw', 'image/x-adobe-dng', 'image/x-fuji-raf', 'image/x-nikon-nef', 'image/x-nikon-nrw', 'image/x-olympus-orf', 'image/x-panasonic-raw', 'image/x-pentax-pef', 'image/x-sony-arw', 'image/x-sony-srw', 'image/heic', 'image/ARW', 'image/BMP', 'image/CR2', 'image/CRW', 'image/DNG', 'image/HEIC', 'image/JPG', 'image/JPEG', 'image/NEF', 'image/NRW', 'image/ORF', 'image/PEF', 'image/PNG', 'image/RAF', 'image/SRW', 'image/TIF', 'image/TIFF'];
+
 const validFileExtensionsString = validFileExtensions.join(', ');
 const validMimeTypesString = mimeType.join(', ');
 const validFileExtensionsAndMimeTypesString = validFileExtensionsString + ', ' + validMimeTypesString;
 
 const hasInvalidFile = ref(false);
-const invalidFileNames = ref([] as string[]);
 const canUpload = computed(() => {
   return inputFiles.value.length > 0 && !hasInvalidFile.value
 })
@@ -129,16 +115,18 @@ function toggleInvalidList () {
 const photoUploadOption = ref(1);
 const inputFiles = ref([] as File[]);
 
-const onChangeUploadPhoto = (event: any) => {
+function onChangeUploadPhoto (event: any) {
+  hasInvalidFile.value = false;
+
   [...event.target.files].forEach((file: File) => {
     const ext = '.' + file.name.match(/\.([^\.]+)$/)![1].toLowerCase();
-    if (!validFileExtensions.includes(ext)) {
+    if (!validFileExtensions.includes(ext) || !mimeType.includes(file.type)) {
       hasInvalidFile.value = true
-      invalidFileNames.value.push(file.name)
-    } else {
-      inputFiles.value.push(file);
+      return
     }
-  });
+  })
+
+  inputFiles.value = [...event.target.files];
 }
 
 const uploadPhoto = async() => {
@@ -168,7 +156,10 @@ const uploadPhoto = async() => {
       $emit('uploaded-new-photo', response.data);
       }
     ).catch((error) => {
-      console.log(error);
+      if (error.response.data.error === 'Invalid file type.') {
+        hasInvalidFile.value = true
+      }
+      console.log(error.response.data);
     });
 }
 
@@ -182,28 +173,30 @@ function cancelUpload () {
 }
 
 const closeUploadPhoto = () => {
-  inputFiles.value = [];
-  photoUploadOption.value = 1;
-
   $emit('close-upload-photo');
 }
 
 // upload progress
 interface Upload {
   name: string,
+  type: string,
   progress: number
 }
 
 const uploads = ref([] as Upload[]);
 watch(inputFiles, () => {
-  uploads.value = [...inputFiles.value].map((file: File) => ({name: file.name, progress: 0}))
+  uploads.value = [...inputFiles.value].map((file: File) => ({
+    name: file.name,
+    type: file.type,
+    progress: 0
+  }))
 })
 
 function getProgressUntilComplete () {
   const getProgressRepeatedly = setInterval(() => {
-    if (uploads.value.every((upload) => upload.progress === 100)) {
+    if (uploads.value.every((upload) => upload.progress === 100) ||
+        hasInvalidFile.value) {
       clearInterval(getProgressRepeatedly)
-      uploads.value = []
       return
     }
     getProgress()
@@ -214,7 +207,12 @@ async function getProgress () {
   // get all files that are not completed
   const uploadsInProgress = uploads.value.filter((upload: Upload) => upload.progress < 100)
   const filesInProgressName = uploadsInProgress.map((upload: Upload) => upload.name)
-  const queryString = '?files=' + encodeURIComponent(JSON.stringify(filesInProgressName))
+  const endcodedFileNames = encodeURIComponent(JSON.stringify(filesInProgressName))
+
+  const filesInProgressType = uploadsInProgress.map((upload: Upload) => upload.type)
+  const endcodedFileTypes = encodeURIComponent(JSON.stringify(filesInProgressType))
+
+  const queryString = '?file_names=' + endcodedFileNames + '&file_types=' + endcodedFileTypes
 
   axios
     .get(`http://localhost:3000/albums/${props.album.id}/upload_progress` + queryString,
@@ -232,7 +230,10 @@ async function getProgress () {
       });
     })
     .catch((error) => {
-      console.log(error);
+      if (error.response.data.error === 'Invalid file type.') {
+        hasInvalidFile.value = true
+      }
+      console.log(error.response.data);
     });
 }
 </script>
