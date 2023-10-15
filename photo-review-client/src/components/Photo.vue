@@ -3,21 +3,28 @@
     <div class="relative container-no-nav-bar">
       <!-- Photo -->
       <div class="container-full-flex items-start">
-        <AdvancedImage v-if="props.photo" :cldImg="getCloudinaryImage(photo.image, photo.angle)"
+        <div class="relative object-contain w-fit h-full border border-red-500">
+          <!-- Rotate photo -->
+          <div class="absolute right-5 z-10 btn-small" @click="rotatePhoto">
+            <font-awesome-icon icon="fa-solid fa-rotate-left" class="btn-small-icon"/>
+          </div>
+          <AdvancedImage v-if="props.photo" :cldImg="getCloudinaryImage(photo.image, photo.angle)"
           place-holder="predominant-color"
           class="object-contain w-full h-full"
-        />
+          />
+        </div>
       </div>
 
       <!-- Buttons -->
       <div class="container-layer w-full h-full grid grid-rows-3">
-        <!-- Back to Album -->
         <div class="row-start-1 flex justify-between">
+          <!-- Back to Album -->
           <div class="ml-5 btn-small" @click="backToAlbum">
             <font-awesome-icon icon="fa-solid fa-arrow-left" class="btn-small-icon"/>
           </div>
-          <div class="mr-5 btn-small" @click="rotatePhoto">
-            <font-awesome-icon icon="fa-solid fa-rotate-left" class="btn-small-icon"/>
+          <!-- Vertical side-by-side -->
+          <div class="mr-5 btn-small" @click="splitVertical(2)">
+            <font-awesome-icon icon="fa-solid fa-table-columns" class="btn-small-icon"/>
           </div>
         </div>
 
@@ -157,6 +164,12 @@ const isLastPhoto = computed(() => {
 function backToAlbum () {
   saveReview();
   emit('close-review-photo');
+}
+
+// split screen
+const splitScreenOptions = ref(0); // 0: no split, 1: horizontal, 2: vertical
+function splitVertical (option: number) {
+  // emit('split-vertical');
 }
 
 // rotate photo
