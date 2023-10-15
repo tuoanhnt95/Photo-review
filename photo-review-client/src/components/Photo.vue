@@ -3,21 +3,42 @@
     <div class="relative container-no-nav-bar">
       <!-- Photo -->
       <div class="container-full-flex items-start">
-        <AdvancedImage v-if="props.photo" :cldImg="getCloudinaryImage(photo.image, photo.angle)"
-          place-holder="predominant-color"
-          class="object-contain w-full h-full"
-        />
+        <div v-for="(display, i) in displayPhotos" :key="display?.id"
+          class="relative object-contain w-fit h-full"
+          :class="[ splitScreenOption > 0 ? 'w-1/2' : 'w-full' ]"
+        >
+          <!-- Rotate photo -->
+          <div class="absolute right-10 z-10 btn-small" @click="rotatePhoto(i)">
+            <font-awesome-icon icon="fa-solid fa-rotate-left" class="btn-small-icon"/>
+          </div>
+          <!-- Review -->
+          <div class="absolute bottom-10 z-10 row-start-3 self-end flex w-full justify-center">
+            <div v-for="opt in reviewDisplayOptions" :key="opt.value"
+              class="btn-review" :class="{ 'btn-selected': reviewResult(i) === opt.value }"
+            >
+              <font-awesome-icon :icon="`fa-solid fa-${opt.icon}`"
+                v-model="photo.review_results"
+                @click="reviewPhoto(i, opt.value)"
+              />
+            </div>
+          </div>
+          <AdvancedImage v-if="display" :cldImg="getCloudinaryImage(display.image, display.angle)"
+            place-holder="predominant-color"
+            class="object-contain w-full h-full"
+          />
+        </div>
       </div>
 
       <!-- Buttons -->
       <div class="container-layer w-full h-full grid grid-rows-3">
-        <!-- Back to Album -->
         <div class="row-start-1 flex justify-between">
+          <!-- Back to Album -->
           <div class="ml-5 btn-small" @click="backToAlbum">
             <font-awesome-icon icon="fa-solid fa-arrow-left" class="btn-small-icon"/>
           </div>
-          <div class="mr-5 btn-small" @click="rotatePhoto">
-            <font-awesome-icon icon="fa-solid fa-rotate-left" class="btn-small-icon"/>
+          <!-- Vertical side-by-side -->
+          <div class="mr-5 btn-small" @click="splitScreen(1)">
+            <font-awesome-icon icon="fa-solid fa-table-columns" class="btn-small-icon"/>
           </div>
         </div>
 
@@ -25,33 +46,16 @@
         <div class="row-start-2 self-center w-full flex justify-between">
           <font-awesome-icon icon="fa-solid fa-caret-left"
             class="btn-navigate-photo ml-6"
-            :class="[ isFirstPhoto ? 'opacity-0': 'cursor-pointer' ]"
+            :class="[ canNavigate(-1) ? 'cursor-pointer' : 'opacity-0' ]"
             @click="navigatePhoto(-1)"
           />
           <font-awesome-icon icon="fa-solid fa-caret-right"
             class="btn-navigate-photo mr-6"
-            :class="[ isLastPhoto ? 'opacity-0': 'cursor-pointer' ]"
+            :class="[ canNavigate(1) ? 'cursor-pointer' : 'opacity-0' ]"
             @click="navigatePhoto(1)"
           />
         </div>
-
-        <!-- Review -->
-        <div class="row-start-3 self-end flex w-full justify-center">
-          <div v-for="opt in reviewDisplayOptions" :key="opt.value"
-            class="btn-review" :class="{ 'btn-selected': reviewComputed === opt.value }"
-          >
-            <font-awesome-icon :icon="`fa-solid fa-${opt.icon}`"
-              v-model="photo.review_results"
-              @click="reviewPhoto(opt.value)"
-            />
-          </div>
-        </div>
       </div>
-      <!-- <div>
-          <button>Delete</button>
-          <button>Zoom in</button>
-          <button>Zoom out</button>
-        </div> -->
     </div>
   </div>
 </template>
@@ -66,6 +70,7 @@ import { AdvancedImage } from '@cloudinary/vue';
 const emit = defineEmits(['reviewed-photo', 'close-review-photo', 'navigate-photo']);
 
 interface Photo {
+[x: string]: any;
   id: number,
   name: string,
   image: string,
@@ -86,6 +91,32 @@ const props = defineProps({
     required: true
   }
 });
+const currentIndex = computed(() => {
+  return photos.value.findIndex((pho: Photo) => pho.id === props.photo.id);
+})
+
+const displayPhotos = computed(() => {
+  // if photo is the last photo => display it and the one before
+  if (splitScreenOption.value === 0) {
+    return [photo.value];
+  } else if (splitScreenOption.value === 1) {
+    if (currentIndex.value === photos.value.length - 1) {
+      return [previousPhoto.value, photo.value];
+    }
+    return [photo.value, nextPhoto.value];
+  }
+});
+
+const nextPhoto = computed(() => {
+// get the next photo in the album
+// if this is the last photo, then nothing
+  return (currentIndex.value === photos.value.length - 1) ? null : photos.value[currentIndex.value + 1];
+})
+const previousPhoto = computed(() => {
+// get the previous photo in the album
+// if this is the first photo, then nothing
+  return currentIndex.value === 0 ? null : photos.value[currentIndex.value - 1];
+})
 const photo = ref(props.photo);
 const photos = ref(props.photos);
 
@@ -99,27 +130,40 @@ const getCloudinaryImage = (publicId: String, angle: number) => {
 }
 
 // Review
-const reviewComputed = computed(() => {
-  return photo.value.review_results;
-});
+function reviewResult (index: number) {
+  const reviewedPhoto = displayPhotos.value?.[index];
+  return reviewedPhoto ? reviewedPhoto.review_results : -1;
+};
 
-function reviewPhoto (value: number) {
+function reviewPhoto (index: number, value: number) {
   if (value !== -1) {
-    photo.value.review_results = value;
-    navigatePhoto(1);
+    const reviewedPhoto = displayPhotos.value?.[index];
+    if (reviewedPhoto) {
+      reviewedPhoto.review_results = value;
+    }
+    if (splitScreenOption.value === 0) {
+      navigatePhoto(1);
+    }
   }
 }
 
-function saveReview () {
-  if ((photo.value.review_results !== -1) ||
-      (props.photo.angle !== photo.value.angle)) {
+function displayedPhoto (index: number) {
+  return displayPhotos.value?.[index];
+}
+
+function saveReview (index = 0) {
+  const displayedPhoto = displayPhotos.value?.[index];
+  if (!displayedPhoto) return;
+
+  if ((displayedPhoto?.review_results !== -1) ||
+      (photoOriginalAngles.value[index] !== displayedPhoto.angle)) {
     axios
       .put(`http://localhost:3000/photos/${photo.value.id}/photo_user_reviews`, {
         review_value: photo.value.review_results,
         angle: photo.value.angle
       })
       .then(() => {
-        rotateCounter.value = 0;
+        rotateCounters.value[index] = 0;
         return;
       })
       .catch((error) => {
@@ -130,27 +174,26 @@ function saveReview () {
 
 // navigate
 function navigatePhoto (value: number) {
+  if (!canNavigate(value)) return
+
   saveReview();
-  // emit navigate
-  const index = photos.value.findIndex((pho: Photo) => pho.id === props.photo.id);
+
   // if first photo and navigate left, end
   // if last photo and navigate right, end
-  if ((index === 0 && value === -1) || (index === photos.value.length - 1 && value === 1)) {
+  if ((currentIndex.value === 0 && value === -1) || (currentIndex.value === photos.value.length - 1 && value === 1)) {
     return;
   } else {
-    const photoToNavigate = photos.value[index + value];
+    const photoToNavigate = photos.value[currentIndex.value + value];
     emit('navigate-photo', photoToNavigate.id);
   }
 }
 
 const isFirstPhoto = computed(() => {
-  const index = photos.value.findIndex((pho: Photo) => pho.id === props.photo.id);
-  return (index === 0);
+  return currentIndex.value === 0;
 });
 
 const isLastPhoto = computed(() => {
-  const index = photos.value.findIndex((pho: Photo) => pho.id === props.photo.id);
-  return (index === photos.value.length - 1);
+  return currentIndex.value === photos.value.length - 1;
 });
 
 // back to album
@@ -159,23 +202,60 @@ function backToAlbum () {
   emit('close-review-photo');
 }
 
-// rotate photo
-const rotateCounter = ref(0);
-let photoOriginalAngle = props.photo.angle;
-function rotatePhoto () {
-  if (rotateCounter.value === 3) {
-    rotateCounter.value = 0;
-    photo.value.angle = photoOriginalAngle;
+// split screen
+const splitScreenOption = ref(0); // 0: no split, 1: horizontal, 2: vertical
+function splitScreen (option: number) {
+  if (splitScreenOption.value === option) {
+    splitScreenOption.value = 0;
   } else {
-    rotateCounter.value++;
-    photo.value.angle = photoOriginalAngle - (rotateCounter.value * 90);
-    console.log('1', photo.value.angle)
+    splitScreenOption.value = option;
+  }
+}
+
+// value: 1 => next, -1 => previous
+function canNavigate (value: number) {
+  // if move back, first photo or split screen and photo after first -> cannot navigate
+  if (value === -1) {
+    if (isFirstPhoto.value) return false;
+  }
+  // if move next, last photo or split screen and photo before last -> cannot navigate
+  if (value === 1) {
+    if (isLastPhoto.value ||
+        (splitScreenOption.value === 1 &&
+         currentIndex.value === photos.value.length - 2)) {
+      return false;
+    }
+  }
+  return true;
+}
+
+// rotate photo
+const rotateCounters = ref([0, 0]);
+const photoOriginalAngles = computed(() => {
+  if (!displayPhotos.value) return [];
+  // get the id of the photos in the displayPhotos
+  const ids = displayPhotos.value.map(pho => pho?.id);
+  return props.photos
+    .filter(pho => ids.includes(pho.id))
+    .map(pho => pho?.angle || 0);
+  // return displayPhotos.value?.map(pho => pho?.angle || 0);
+})
+
+function rotatePhoto (index = 0) {
+  const displayPhoto = displayedPhoto(index)
+  if (!displayPhoto) return;
+
+  if (rotateCounters.value[index] === 3) {
+    rotateCounters.value[index] = 0;
+    displayPhoto.angle = photoOriginalAngles.value[index];
+  } else {
+    rotateCounters.value[index]++;
+    displayPhoto.angle = photoOriginalAngles.value[index] - (rotateCounters.value[index] * 90);
   }
 }
 
 watch(() => props.photo, (newVal) => {
   photo.value = newVal;
-  photoOriginalAngle = newVal.angle;
 });
 
 // display v-for
@@ -245,6 +325,7 @@ const reviewDisplayOptions = [
 .container-full-flex {
   display: flex;
   justify-content: center;
+  gap: 1px;
   width: 100%;
   height: 100%;
 }
