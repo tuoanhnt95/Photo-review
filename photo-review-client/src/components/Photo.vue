@@ -106,6 +106,7 @@ const reviewComputed = computed(() => {
 function reviewPhoto (value: number) {
   if (value !== -1) {
     photo.value.review_results = value;
+    navigatePhoto(1);
   }
 }
 
