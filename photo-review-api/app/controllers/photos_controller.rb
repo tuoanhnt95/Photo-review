@@ -74,6 +74,17 @@ class PhotosController < ApplicationController
     Cloudinary::Uploader.destroy(folder + public_id)
   end
 
+  # DELETE /photos/delete_photos
+  def destroy_multiple
+    params[:photo_ids].each do |photoId|
+      photo = Photo.find(photoId)
+      public_id = photo.image
+      photo.destroy
+      folder = 'photo_review/'
+      Cloudinary::Uploader.destroy(folder + public_id)
+    end
+  end
+
   private
 
   def create_new_upload(file)
@@ -126,6 +137,6 @@ class PhotosController < ApplicationController
 
   # Only allow a list of trusted parameters through.
   def photo_params
-    params.permit(:image, :angle, :album_id, :upload_option, files: [])
+    params.permit(:image, :angle, :album_id, :upload_option, files: [], :photo_ids => [])
   end
 end

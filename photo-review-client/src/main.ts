@@ -12,10 +12,13 @@ import { library } from '@fortawesome/fontawesome-svg-core'
 import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome'
 
 /* import specific icons */
-import { faPlus, faX, faHouse, faBell, faGear, faUser, faPen, faCalendarDays, faFloppyDisk, faCheck, faXmark, faQuestion, faCaretRight, faCaretLeft, faCaretDown, faArrowLeft, faExclamation, faRotateLeft, faGripLines, faTableColumns } from '@fortawesome/free-solid-svg-icons'
+import { faPlus, faX, faHouse, faBell, faGear, faUser, faPen, faCalendarDays, faFloppyDisk, faCheck, faXmark, faQuestion, faCaretRight, faCaretLeft, faCaretDown, faArrowLeft, faExclamation, faRotateLeft, faGripLines, faTableColumns, faCircleCheck, faShareFromSquare } from '@fortawesome/free-solid-svg-icons'
+
+import { faTrashCan, faSquareMinus } from '@fortawesome/free-regular-svg-icons'
 
 /* add icons to the library */
-library.add(faPlus, faX, faHouse, faBell, faGear, faUser, faPen, faCalendarDays, faFloppyDisk, faCheck, faXmark, faQuestion, faCaretRight, faCaretLeft, faCaretDown, faArrowLeft, faExclamation, faRotateLeft, faGripLines, faTableColumns)
+library.add(faPlus, faX, faHouse, faBell, faGear, faUser, faPen, faCalendarDays, faFloppyDisk, faCheck, faXmark, faQuestion, faCaretRight, faCaretLeft, faCaretDown, faArrowLeft, faExclamation, faRotateLeft, faGripLines, faTableColumns, faCircleCheck, faShareFromSquare)
+library.add( faTrashCan, faSquareMinus )
 
 const app = createApp(App)
 
