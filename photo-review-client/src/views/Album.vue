@@ -228,12 +228,16 @@ const saveEditAlbum = async () => {
 // Select photos for option
 const selectedPhotoIds = ref<number[]>([]);
 function toggleSelectPhoto(photoId: number) {
+  console.log('1', photoId, selectedPhotoIds.value)
   if (selectedPhotoIds.value.includes(photoId)) {
-    const index = selectedPhotoIds.value.findIndex((x) => (x = photoId));
+    const index = selectedPhotoIds.value.findIndex((x) => (x === photoId));
+    console.log('2', index)
     selectedPhotoIds.value.splice(index, 1);
   } else {
+    console.log('3')
     selectedPhotoIds.value.push(photoId);
   }
+  console.log('4', selectedPhotoIds.value)
 }
 
 function cancelSelectPhotos() {
