@@ -15,6 +15,9 @@
         </div>
 
         <div v-if="!isEditing" class="flex">
+          <font-awesome-icon icon="fa-solid fa-ellipsis" class="m-2 text-xl text-slate-400"
+            @click.prevent="toggleContextMenu"
+          />
           <font-awesome-icon icon="fa-solid fa-pen"
             class="self-center text-slate-400"
             @click.prevent="startEditingAlbum"
@@ -102,6 +105,26 @@
             :class="{ 'icon-circle-check-selected': selectedPhotoIds.includes(photo.id) }"
             @click.prevent="toggleSelectPhoto(photo.id)"
           />
+        </div>
+      </div>
+    </div>
+
+    <!-- ContextMenu -->
+    <div v-if="contextMenuIsOpen"
+      :album="album"
+      class="absolute w-full z-10"
+      @click.prevent="toggleContextMenu"
+      @toogle-list-view="selectAlbumViewOption"
+    >
+      <div class="absolute top-0 right-0 w-40 bg-white rounded-sm shadow-lg">
+        <div v-for="(opt, i) in albumViewOptions" :key="opt.name"
+          class="container-context-menu px-2 py-2"
+          :class="{ 'bg-slate-200': i === selectedAlbumViewIndex }"
+          @click.prevent="selectAlbumViewOption(i)"
+        >
+          <font-awesome-icon :class="{ 'opacity-0': i !== selectedAlbumViewIndex }" icon="fa-solid fa-check" />
+          <div>{{ opt.name }}</div>
+          <font-awesome-icon :icon="opt.icon" class="mr-2" />
         </div>
       </div>
     </div>
@@ -197,19 +220,39 @@ const isEditing = ref(false);
 const albumName = ref('');
 const albumExpiryDate = ref(new Date());
 
-const startEditingAlbum = () => {
+// Context menu
+const contextMenuIsOpen = ref(false);
+function toggleContextMenu () {
+  contextMenuIsOpen.value = !contextMenuIsOpen.value;
+}
+
+const albumViewOptions = [
+  { name: 'Icons', icon: 'fa-solid fa-border-all' },
+  { name: 'List', icon: 'fa-solid fa-list' },
+];
+const selectedAlbumViewIndex = ref(0);
+function selectAlbumViewOption (index: number) {
+  selectedAlbumViewIndex.value = index;
+}
+// Todo: show contextmenu when clicking option
+// TODO: Add list view, with album name, date, number of photos, and expiry date
+// TODO: Add option to sort by date, name, number of photos, and expiry date
+// TODO: Add option to filter by date, name, number of photos, and expiry date
+// TODO: Add option to search by name
+
+function startEditingAlbum () {
   isEditing.value = true;
   albumName.value = album.value.name;
   albumExpiryDate.value = album.value.expiry_date;
 };
 
-const cancelEditAlbum = () => {
+function cancelEditAlbum () {
   albumName.value = '';
   albumExpiryDate.value = new Date();
   isEditing.value = false;
 };
 
-const saveEditAlbum = async () => {
+async function saveEditAlbum () {
   await axios
     .patch('http://localhost:3000/albums/' + albumId.value, {
       name: albumName.value,
@@ -228,23 +271,19 @@ const saveEditAlbum = async () => {
 // Select photos for option
 const selectedPhotoIds = ref<number[]>([]);
 function toggleSelectPhoto(photoId: number) {
-  console.log('1', photoId, selectedPhotoIds.value)
   if (selectedPhotoIds.value.includes(photoId)) {
     const index = selectedPhotoIds.value.findIndex((x) => (x === photoId));
-    console.log('2', index)
     selectedPhotoIds.value.splice(index, 1);
   } else {
-    console.log('3')
     selectedPhotoIds.value.push(photoId);
   }
-  console.log('4', selectedPhotoIds.value)
 }
 
 function cancelSelectPhotos() {
   selectedPhotoIds.value = [];
 }
 
-const deletePhotos = async () => {
+async function deletePhotos () {
   let message = ''
   if (selectedPhotoIds.value.length === 1) {
     const selectedPhoto = photos.value.find((x: Photo) => x.id === selectedPhotoIds.value[0]);
@@ -269,20 +308,22 @@ const deletePhotos = async () => {
       console.log(error);
     });
 };
-const removePhoto = (photoId: number) => {
+
+function removePhoto (photoId: number) {
   const index = photosData.value.findIndex(
     (photo: Photo) => photo.id === photoId
   );
   photosData.value.splice(index, 1);
 };
-const addPhoto = (photos: [Photo]) => {
+
+function addPhoto (photos: [Photo]) {
   photos.forEach((photo) => {
     // photosData.value.unshift(photo);
     photosData.value.push(photo);
   });
 };
 
-const formatDate = (date: Date) => {
+function formatDate (date: Date) {
   date = new Date(date);
   return date.toISOString().split('T')[0];
 };
@@ -327,14 +368,15 @@ function numberOfPhotosWithReview(val: number | null) {
 const isShowingPhoto = ref(false);
 const photoShowing = ref<Photo>();
 // const photoShowing = ref<Photo | null>();
-const showPhoto = (photoId: Number) => {
+function showPhoto (photoId: Number) {
   photoShowing.value = photosData.value.find((x) => x.id === photoId);
   isShowingPhoto.value = true;
 };
-const updatePhoto = (photo: Photo) => {
+function updatePhoto (photo: Photo) {
   const index = photosData.value.findIndex((x) => x.id === photo.id);
   photosData.value[index] = photo;
 };
+
 function closeReviewPhoto() {
   isShowingPhoto.value = false;
   // photoShowing.value = {};
@@ -390,5 +432,13 @@ function getPhotoClass(photo: Photo) {
   color: var(--color-primary);
   background-color: white;
   border-radius: 50%;
+}
+
+.container-context-menu {
+  display: grid;
+  grid-template-columns: 1fr 4fr 1fr;
+  align-items: center;
+  cursor: pointer;
+  color: var(--slate-800);
 }
 </style>
