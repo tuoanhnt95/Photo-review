@@ -15,18 +15,14 @@
         </div>
 
         <div v-if="!isEditing" class="flex">
-          <font-awesome-icon icon="fa-solid fa-pen"
-            class="self-center text-slate-400"
-            @click.prevent="startEditingAlbum"
+          <font-awesome-icon icon="fa-solid fa-ellipsis"
+            class="m-2 text-xl text-slate-400"
+            @click.prevent="toggleContextMenu"
           />
         </div>
         <div v-else class="flex space-x-6 self-center">
-          <font-awesome-icon icon="fa-solid fa-floppy-disk"
-            @click.prevent="saveEditAlbum()"
-          />
-          <font-awesome-icon icon="fa-solid fa-x"
-            @click.prevent="cancelEditAlbum()"
-          />
+          <font-awesome-icon icon="fa-solid fa-floppy-disk" @click.prevent="saveEditAlbum()"/>
+          <font-awesome-icon icon="fa-solid fa-x" @click.prevent="cancelEditAlbum()"/>
         </div>
       </div>
       <!-- Filter -->
@@ -74,8 +70,10 @@
           </div>
         </div>
       </div>
+
       <!-- Photos -->
-      <div class="grid grid-cols-5 gap-0.5 w-full mt-4">
+      <!-- Icon view -->
+      <div v-if="selectedAlbumViewIndex !== 1" class="grid grid-cols-5 gap-0.5 w-full">
         <div class="photo-container flex"
           @click.prevent="isUploadingPhoto = true"
         >
@@ -103,6 +101,64 @@
             @click.prevent="toggleSelectPhoto(photo.id)"
           />
         </div>
+      </div>
+      <!-- Photos list view -->
+      <div v-else class="items-center">
+        <table class="w-full">
+          <tbody>
+            <tr
+              v-for="(photo, i) in photos"
+              :key="i"
+              class="w-full h-11 cursor-pointer border-b"
+            >
+              <td class="w-11 h-full">
+                <div class="flex justify-center align-middle w-full h-full">
+                  <font-awesome-icon icon="fa-solid fa-circle-check"
+                  class="icon-circle-check-viewList"
+                  :class="{ 'icon-circle-check-selected': selectedPhotoIds.includes(photo.id)}"
+                  @click.prevent="toggleSelectPhoto(photo.id)"
+                  />
+                </div>
+              </td>
+              <td class="w-11 h-11" @click.prevent="showPhoto(photo.id)">
+                <AdvancedImage
+                  :id="photo.image"
+                  :cldImg="getCloudinaryImage(photo.image, photo.angle)"
+                  class="object-cover h-full"
+                  :class="getPhotoClass(photo)"
+                />
+              </td>
+              <td @click.prevent="showPhoto(photo.id)">
+                <div>{{ photo.name }}</div>
+                <!-- TODO: Show original size -->
+                <div class="text-xs text-slate-400"></div>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- ContextMenu -->
+    <div v-if="contextMenuIsOpen"
+      :album="album"
+      class="absolute top-16 right-0 w-40 z-10 bg-white rounded-md border border-red-100 shadow-lg border-t"
+      @click.prevent="toggleContextMenu"
+      @toogle-list-view="selectAlbumViewOption"
+    >
+      <div class="container-context-menu px-2 py-2 border-b-4" @click.prevent="startEditingAlbum">
+        <div></div>
+        <div>Edit</div>
+        <font-awesome-icon icon="fa-solid fa-pen" class="self-center mr-2" />
+      </div>
+      <div v-for="(opt, i) in albumViewOptions" :key="opt.name"
+        class="container-context-menu px-2 py-2"
+        :class="{ 'bg-slate-200': i === selectedAlbumViewIndex }"
+        @click.prevent="selectAlbumViewOption(i)"
+      >
+        <font-awesome-icon :class="{ 'opacity-0': i !== selectedAlbumViewIndex }" icon="fa-solid fa-check" />
+        <div>{{ opt.name }}</div>
+        <font-awesome-icon :icon="opt.icon" class="mr-2" />
       </div>
     </div>
 
@@ -197,19 +253,39 @@ const isEditing = ref(false);
 const albumName = ref('');
 const albumExpiryDate = ref(new Date());
 
-const startEditingAlbum = () => {
+// Context menu
+const contextMenuIsOpen = ref(false);
+function toggleContextMenu () {
+  contextMenuIsOpen.value = !contextMenuIsOpen.value;
+}
+
+const albumViewOptions = [
+  { name: 'Icons', icon: 'fa-solid fa-border-all' },
+  { name: 'List', icon: 'fa-solid fa-list' },
+];
+const selectedAlbumViewIndex = ref(0);
+function selectAlbumViewOption (index: number) {
+  selectedAlbumViewIndex.value = index;
+}
+// Todo: show contextmenu when clicking option
+// TODO: Add list view, with album name, date, number of photos, and expiry date
+// TODO: Add option to sort by date, name, number of photos, and expiry date
+// TODO: Add option to filter by date, name, number of photos, and expiry date
+// TODO: Add option to search by name
+
+function startEditingAlbum () {
   isEditing.value = true;
   albumName.value = album.value.name;
   albumExpiryDate.value = album.value.expiry_date;
 };
 
-const cancelEditAlbum = () => {
+function cancelEditAlbum () {
   albumName.value = '';
   albumExpiryDate.value = new Date();
   isEditing.value = false;
 };
 
-const saveEditAlbum = async () => {
+async function saveEditAlbum () {
   await axios
     .patch('http://localhost:3000/albums/' + albumId.value, {
       name: albumName.value,
@@ -228,23 +304,19 @@ const saveEditAlbum = async () => {
 // Select photos for option
 const selectedPhotoIds = ref<number[]>([]);
 function toggleSelectPhoto(photoId: number) {
-  console.log('1', photoId, selectedPhotoIds.value)
   if (selectedPhotoIds.value.includes(photoId)) {
     const index = selectedPhotoIds.value.findIndex((x) => (x === photoId));
-    console.log('2', index)
     selectedPhotoIds.value.splice(index, 1);
   } else {
-    console.log('3')
     selectedPhotoIds.value.push(photoId);
   }
-  console.log('4', selectedPhotoIds.value)
 }
 
 function cancelSelectPhotos() {
   selectedPhotoIds.value = [];
 }
 
-const deletePhotos = async () => {
+async function deletePhotos () {
   let message = ''
   if (selectedPhotoIds.value.length === 1) {
     const selectedPhoto = photos.value.find((x: Photo) => x.id === selectedPhotoIds.value[0]);
@@ -269,20 +341,22 @@ const deletePhotos = async () => {
       console.log(error);
     });
 };
-const removePhoto = (photoId: number) => {
+
+function removePhoto (photoId: number) {
   const index = photosData.value.findIndex(
     (photo: Photo) => photo.id === photoId
   );
   photosData.value.splice(index, 1);
 };
-const addPhoto = (photos: [Photo]) => {
+
+function addPhoto (photos: [Photo]) {
   photos.forEach((photo) => {
     // photosData.value.unshift(photo);
     photosData.value.push(photo);
   });
 };
 
-const formatDate = (date: Date) => {
+function formatDate (date: Date) {
   date = new Date(date);
   return date.toISOString().split('T')[0];
 };
@@ -327,14 +401,15 @@ function numberOfPhotosWithReview(val: number | null) {
 const isShowingPhoto = ref(false);
 const photoShowing = ref<Photo>();
 // const photoShowing = ref<Photo | null>();
-const showPhoto = (photoId: Number) => {
+function showPhoto (photoId: Number) {
   photoShowing.value = photosData.value.find((x) => x.id === photoId);
   isShowingPhoto.value = true;
 };
-const updatePhoto = (photo: Photo) => {
+function updatePhoto (photo: Photo) {
   const index = photosData.value.findIndex((x) => x.id === photo.id);
   photosData.value[index] = photo;
 };
+
 function closeReviewPhoto() {
   isShowingPhoto.value = false;
   // photoShowing.value = {};
@@ -376,19 +451,30 @@ function getPhotoClass(photo: Photo) {
   position: absolute;
   top: 0.25rem;
   left: 0.25rem;
+}
+
+.icon-circle-check, .icon-circle-check-viewList {
   z-index: 50;
   opacity: 0;
 }
 
-.icon-circle-check:hover {
+.icon-circle-check:hover, .icon-circle-check-viewList:hover {
   opacity: 1;
   color: var(--slate-300);
 }
 
-.icon-circle-check-selected, .icon-circle-check-selected:hover  {
+.icon-circle-check-selected, .icon-circle-check-selected:hover {
   opacity: 1;
   color: var(--color-primary);
   background-color: white;
   border-radius: 50%;
+}
+
+.container-context-menu {
+  display: grid;
+  grid-template-columns: 1fr 4fr 1fr;
+  align-items: center;
+  cursor: pointer;
+  color: var(--slate-800);
 }
 </style>
