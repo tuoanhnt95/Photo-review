@@ -15,21 +15,14 @@
         </div>
 
         <div v-if="!isEditing" class="flex">
-          <font-awesome-icon icon="fa-solid fa-ellipsis" class="m-2 text-xl text-slate-400"
+          <font-awesome-icon icon="fa-solid fa-ellipsis"
+            class="m-2 text-xl text-slate-400"
             @click.prevent="toggleContextMenu"
-          />
-          <font-awesome-icon icon="fa-solid fa-pen"
-            class="self-center text-slate-400"
-            @click.prevent="startEditingAlbum"
           />
         </div>
         <div v-else class="flex space-x-6 self-center">
-          <font-awesome-icon icon="fa-solid fa-floppy-disk"
-            @click.prevent="saveEditAlbum()"
-          />
-          <font-awesome-icon icon="fa-solid fa-x"
-            @click.prevent="cancelEditAlbum()"
-          />
+          <font-awesome-icon icon="fa-solid fa-floppy-disk" @click.prevent="saveEditAlbum()"/>
+          <font-awesome-icon icon="fa-solid fa-x" @click.prevent="cancelEditAlbum()"/>
         </div>
       </div>
       <!-- Filter -->
@@ -77,8 +70,10 @@
           </div>
         </div>
       </div>
+
       <!-- Photos -->
-      <div class="grid grid-cols-5 gap-0.5 w-full mt-4">
+      <!-- Icon view -->
+      <div v-if="selectedAlbumViewIndex !== 1" class="grid grid-cols-5 gap-0.5 w-full">
         <div class="photo-container flex"
           @click.prevent="isUploadingPhoto = true"
         >
@@ -107,25 +102,63 @@
           />
         </div>
       </div>
+      <!-- Photos list view -->
+      <div v-else class="items-center">
+        <table class="w-full">
+          <tbody>
+            <tr
+              v-for="(photo, i) in photos"
+              :key="i"
+              class="w-full h-11 cursor-pointer border-b"
+            >
+              <td class="w-11 h-full">
+                <div class="flex justify-center align-middle w-full h-full">
+                  <font-awesome-icon icon="fa-solid fa-circle-check"
+                  class="icon-circle-check-viewList"
+                  :class="{ 'icon-circle-check-selected': selectedPhotoIds.includes(photo.id)}"
+                  @click.prevent="toggleSelectPhoto(photo.id)"
+                  />
+                </div>
+              </td>
+              <td class="w-11 h-11" @click.prevent="showPhoto(photo.id)">
+                <AdvancedImage
+                  :id="photo.image"
+                  :cldImg="getCloudinaryImage(photo.image, photo.angle)"
+                  class="object-cover h-full"
+                  :class="getPhotoClass(photo)"
+                />
+              </td>
+              <td @click.prevent="showPhoto(photo.id)">
+                <div>{{ photo.name }}</div>
+                <!-- TODO: Show original size -->
+                <div class="text-xs text-slate-400"></div>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
     </div>
 
     <!-- ContextMenu -->
     <div v-if="contextMenuIsOpen"
       :album="album"
-      class="absolute w-full z-10"
+      class="absolute top-16 right-0 w-40 z-10 bg-white rounded-md border border-red-100 shadow-lg border-t"
       @click.prevent="toggleContextMenu"
       @toogle-list-view="selectAlbumViewOption"
     >
-      <div class="absolute top-0 right-0 w-40 bg-white rounded-sm shadow-lg">
-        <div v-for="(opt, i) in albumViewOptions" :key="opt.name"
-          class="container-context-menu px-2 py-2"
-          :class="{ 'bg-slate-200': i === selectedAlbumViewIndex }"
-          @click.prevent="selectAlbumViewOption(i)"
-        >
-          <font-awesome-icon :class="{ 'opacity-0': i !== selectedAlbumViewIndex }" icon="fa-solid fa-check" />
-          <div>{{ opt.name }}</div>
-          <font-awesome-icon :icon="opt.icon" class="mr-2" />
-        </div>
+      <div class="container-context-menu px-2 py-2 border-b-4" @click.prevent="startEditingAlbum">
+        <div></div>
+        <div>Edit</div>
+        <font-awesome-icon icon="fa-solid fa-pen" class="self-center mr-2" />
+      </div>
+      <div v-for="(opt, i) in albumViewOptions" :key="opt.name"
+        class="container-context-menu px-2 py-2"
+        :class="{ 'bg-slate-200': i === selectedAlbumViewIndex }"
+        @click.prevent="selectAlbumViewOption(i)"
+      >
+        <font-awesome-icon :class="{ 'opacity-0': i !== selectedAlbumViewIndex }" icon="fa-solid fa-check" />
+        <div>{{ opt.name }}</div>
+        <font-awesome-icon :icon="opt.icon" class="mr-2" />
       </div>
     </div>
 
@@ -418,16 +451,19 @@ function getPhotoClass(photo: Photo) {
   position: absolute;
   top: 0.25rem;
   left: 0.25rem;
+}
+
+.icon-circle-check, .icon-circle-check-viewList {
   z-index: 50;
   opacity: 0;
 }
 
-.icon-circle-check:hover {
+.icon-circle-check:hover, .icon-circle-check-viewList:hover {
   opacity: 1;
   color: var(--slate-300);
 }
 
-.icon-circle-check-selected, .icon-circle-check-selected:hover  {
+.icon-circle-check-selected, .icon-circle-check-selected:hover {
   opacity: 1;
   color: var(--color-primary);
   background-color: white;
