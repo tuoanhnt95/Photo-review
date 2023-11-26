@@ -23,13 +23,14 @@ module PhotoReviewApi
     # Middleware like session, flash, cookies can be added back manually.
     # Skip views, helpers and assets when generating a new resource.
     config.api_only = true
+    config.middleware.use ActionDispatch::Flash
 
     # disable session cookies temporarily to bypass errors for testing
     # will need to re-enable later
     # error: when uploading photo to album, getting error:
     # https://github.com/waiting-for-dev/devise-jwt/issues/235
-    # config.session_store :cookie_store, key: '_interslice_session'
-    # config.middleware.use ActionDispatch::Cookies
-    # config.middleware.use config.session_store, config.session_options
+    config.session_store :cookie_store, key: '_interslice_session'
+    config.middleware.use ActionDispatch::Cookies
+    config.middleware.use config.session_store, config.session_options
   end
 end

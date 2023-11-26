@@ -3,11 +3,11 @@
     <h1>Signup</h1>
     <form @submit="handleSubmit">
       <label for="email">Email:</label>
-      <input type="email" id="email" v-model="email" required>
+      <input type="email" id="email" v-model="email" required class="text-black border">
       <label for="password">Password:</label>
-      <input type="password" id="password" v-model="password" required>
+      <input type="password" id="password" v-model="password" required class="text-black border">
       <label for="confirmPassword">Confirm Password:</label>
-      <input type="password" id="confirmPassword" v-model="password2" required>
+      <input type="password" id="confirmPassword" v-model="password2" required class="text-black border">
       <button type="submit">Sign Up</button>
     </form>
   </div>
@@ -15,16 +15,37 @@
 
 <script setup lang="ts">
 import { ref } from 'vue';
+import axios from 'axios';
 
 const email = ref('');
 const password = ref('');
 const password2 = ref('');
 
-const handleSubmit = (event: Event) => {
+const handleSubmit = async (event: Event) => {
   event.preventDefault();
-  // Perform signup logic here
-  console.log('Email:', email.value);
-  console.log('Password:', password.value);
+
+  if (password.value !== password2.value) {
+    alert('Passwords do not match');
+    return;
+  }
+
+  try {
+    const response = await axios.post('http://localhost:3000/users', {
+      user: {
+        email: email.value,
+        password: password.value
+      }
+      // email: email.value,
+      // password: password.value
+    });
+
+    console.log('Registration successful:', response.data);
+    // Handle success response here
+    // redirect to login page
+  } catch (error) {
+    console.error('Registration failed:', error);
+    // Handle error response here
+  }
 };
 </script>
 
