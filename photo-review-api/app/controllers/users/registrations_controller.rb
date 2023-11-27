@@ -11,12 +11,6 @@ class Users::RegistrationsController < Devise::RegistrationsController
 
   # POST /resource
   # def create
-  #   p '------------------'
-  #   p '------------------'
-  #   p 'create user'
-  #   p params[:email]
-  #   p '------------------'
-  #   p '------------------'
   #   super
   # end
 

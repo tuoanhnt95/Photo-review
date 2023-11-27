@@ -4,9 +4,16 @@
     <form @submit="handleSubmit">
       <label for="email">Email:</label>
       <input type="email" id="email" v-model="email" required class="text-black border">
-      <label for="password">Password:</label>
+      <label for="password">Password
+        <span v-if="password.length === 0" class="text-red-500">(minimum 6 characters)</span>
+        <span v-else-if="password.length < 6" class="text-red-500">({{ 6 - password.length }} more)</span>
+      </label>
       <input type="password" id="password" v-model="password" required class="text-black border">
-      <label for="confirmPassword">Confirm Password:</label>
+      <label for="confirmPassword">Confirm Password
+        <span v-if="password.length === password2.length" class="text-red-500">
+          {{ password !== password2 ? '(passwords do not match)' : '(matched)' }}
+        </span>
+      </label>
       <input type="password" id="confirmPassword" v-model="password2" required class="text-black border">
       <button type="submit">Sign Up</button>
     </form>
@@ -14,15 +21,25 @@
 </template>
 
 <script setup lang="ts">
-import { ref } from 'vue';
+import { computed, ref } from 'vue';
 import axios from 'axios';
+import router from '@/router';
 
 const email = ref('');
 const password = ref('');
 const password2 = ref('');
 
+const validToSubmit = computed (() => {
+  return password.value === password2.value && password.value.length >= 6;
+});
+
 const handleSubmit = async (event: Event) => {
   event.preventDefault();
+
+  if (password.value.length < 6) {
+    alert('Password must be at least 6 characters');
+    return;
+  }
 
   if (password.value !== password2.value) {
     alert('Passwords do not match');
@@ -30,19 +47,17 @@ const handleSubmit = async (event: Event) => {
   }
 
   try {
-    const response = await axios.post('http://localhost:3000/users', {
+    await axios.post('http://localhost:3000/users', {
       user: {
         email: email.value,
         password: password.value
       }
-      // email: email.value,
-      // password: password.value
     });
 
-    console.log('Registration successful:', response.data);
-    // Handle success response here
-    // redirect to login page
+    alert('Registration successful! Redirecting to login page...');
+    router.push({ name: 'Login' });
   } catch (error) {
+    alert('Registration failed. Please try again.');
     console.error('Registration failed:', error);
     // Handle error response here
   }

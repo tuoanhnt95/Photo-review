@@ -8,13 +8,16 @@
       <input type="password" id="password" v-model="password" required>
       <div>Forgot your password?</div>
       <button type="submit">Login</button>
-      <button @click="signUp" class="mt-2">Sign up</button>
+      <RouterLink :to="{ name: 'Signup' }">
+        <button class="mt-2">Sign up</button>
+      </RouterLink>
     </form>
   </div>
 </template>
 
 <script setup lang="ts">
 import { ref } from 'vue';
+import { RouterLink } from 'vue-router';
 
 const email = ref('');
 const password = ref('');
@@ -27,11 +30,6 @@ function login () {
   // if success, redirect to home page
   // else, show error message
 };
-
-function signUp () {
-// Perform sign up logic here
-console.log('Signing up...');
-}
 </script>
 
 <style scoped>
