@@ -67,7 +67,8 @@ interface Album {
   id: number,
   name: string,
   expiry_date: Date,
-  cover: string
+  cover: string,
+  last_upload_batch: number
 }
 
 let albumsData = ref<Album[]>([]);

@@ -36,6 +36,7 @@ interface Album {
   id: number,
   name: string,
   expiry_date: Date,
+  cover: string,
   last_upload_batch: number
 }
 
